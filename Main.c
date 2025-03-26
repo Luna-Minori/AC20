@@ -20,7 +20,13 @@ typedef struct
     char valeur[100];
 } Token;
 
-int taille_liste(char *liste[])
+typedef struct T
+{
+    char *value;
+    struct T *lbranches;
+} Tree;
+
+int taille_liste(const char **liste)
 {
     int taille = 0;
     while (liste[taille] != NULL)
@@ -47,7 +53,6 @@ int find_operator(char *word)
 
     return -1; // Si aucun mot-clé n'est trouvé
 }
-
 
 int find_ponctuation(char *word)
 {
@@ -108,7 +113,15 @@ void analyser_lexical(char *buffer)
         }
         word[index_word] = '\0';
 
-       
+        int index_ponctuation = find_ponctuation(word);
+        if (index_ponctuation == -1)
+        {
+            int index_operator = find_operator(word);
+            if (index_operator == -1)
+            {
+                int index_keyword = find_key_word(word);
+            }
+        }
         index_buffer++;
     }
 }
