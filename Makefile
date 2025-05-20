@@ -11,14 +11,13 @@ CFLAGS = -Wall -Wextra -g
 RM = rm -f
 
 # Fichiers sources et objets
-SRC = Main.c
+SRC = Main.c lexer.c
 OBJ = $(SRC:.c=.o)
 
 # Règle par défaut (compile et exécute)
 all: $(EXEC)
 	@echo "Compilation terminée."
 	@./$(EXEC)
-
 
 # Compilation de l'exécutable
 $(EXEC): $(OBJ)
