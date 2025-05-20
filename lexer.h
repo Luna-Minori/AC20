@@ -15,6 +15,18 @@ typedef enum
     TOKEN_END
 } TokenType;
 
-void analyser_lexical(char *buffer);
+typedef struct {
+    TokenType type;
+    int ligne;
+    char *valeur;
+} Token;
+
+typedef struct {
+    Token *tokens;
+    int count;
+} TokenList;
+
+void lexer(char *buffer, TokenList *list);
+void free_token_list(TokenList *list);
 
 #endif // LEXER_H

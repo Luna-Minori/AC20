@@ -1,34 +1,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "lexer.h"
 
-typedef enum
+void add_token(TokenList *list, Token token)
 {
-    TOKEN_KEYWORD,      // Mot-clé comme "if", "int", etc.
-    TOKEN_IDENTIFIER,   // Identificateur (nom de variable, fonction)
-    TOKEN_OPERATOR,     // Opérateurs comme +, -, *, /, etc.
-    TOKEN_NUMBER,       // Nombre entier ou flottant
-    TOKEN_STRING,       // Chaîne de caractères
-    TOKEN_CHAR,         // Caractère
-    TOKEN_PREPROCESSOR, // Directives de préprocesseur comme #include, #define
-    TOKEN_PUNCTUATION,  // Ponctuation comme (, ), {, }, ;, etc.
-    TOKEN_END           // Fin de fichier
-} TokenType;
+    Token *new_tokens = realloc(list->tokens, (list->count + 1) * sizeof(Token));
+    if (new_tokens == NULL)
+    {
+        // Gestion d'erreur simple
+        fprintf(stderr, "Erreur d'allocation mémoire pour les tokens\n");
+        exit(EXIT_FAILURE);
+    }
+    list->tokens = new_tokens;
+    list->tokens[list->count] = token;
+    list->count++;
+}
 
-typedef struct
+void free_token_list(TokenList *list)
 {
-    TokenType type;
-    int index;
-    int ligne;
-    char *valeur;
-} Token;
-
-typedef struct T
-{
-    TokenType type;
-    char *value;
-    struct T *lbranches;
-} Tree;
+    for (int i = 0; i < list->count; ++i)
+    {
+        free(list->tokens[i].valeur);
+    }
+    free(list->tokens);
+    list->tokens = NULL;
+    list->count = 0;
+}
 
 int taille_liste(const char *liste[])
 {
@@ -96,7 +94,7 @@ int find_key_word(char *word)
         "auto", "break", "case", "char", "const", "default", "do",
         "double", "else", "enum", "float", "for", "if",
         "int", "long", "return", "short", "signed", "sizeof",
-        "struct", "switch", "typedef", "unsigned", "void", "while", "main", NULL};
+        "struct", "switch", "typedef", "unsigned", "void", "while", "main", "free", "malloc", NULL};
     // Parcours du tableau de mots-clés
     for (int i = 0; i < taille_liste(keywords); i++)
     {
@@ -117,7 +115,7 @@ char *reset_word(char word[100])
     }
 }
 
-void analyser_lexical(char *file)
+void lexer(char *file, TokenList *list)
 {
     char *buffer = file;
     char word[100];
@@ -125,6 +123,7 @@ void analyser_lexical(char *file)
     int index_buffer = 0;
     int specifique = 0;
     int wordInCreation = 0;
+    int numero_ligne = 1;
 
     while (buffer[index_buffer] != '\0') // Tant que on est pas à la fin du fichier
     {
@@ -133,12 +132,22 @@ void analyser_lexical(char *file)
             index_buffer++;
         }
 
+        if (buffer[index_buffer] == '\n')
+        {
+            numero_ligne++;
+        }
+
         while (buffer[index_buffer] == '/' && buffer[index_buffer + 1] == '/') // Gestion des commentaires
         {
             index_buffer += 2;                                                   // on saute le //
             while (buffer[index_buffer] != '\0' && buffer[index_buffer] != '\n') // lit toute la ligne
             {
                 index_buffer++;
+            }
+
+            if (buffer[index_buffer] == '\n')
+            {
+                numero_ligne++;
             }
         }
         while (buffer[index_buffer] == '/' && buffer[index_buffer + 1] == '*') // Gestion des commentaires
@@ -187,10 +196,11 @@ void analyser_lexical(char *file)
 
                     Token token_s; // crée le token string
                     token_s.type = TOKEN_STRING;
+                    token_s.ligne = numero_ligne;
                     token_s.valeur = malloc(strlen(word) + 1);
                     strcpy(token_s.valeur, word);
                     printf("TOKEN_STRING: \"%s\"\n", token_s.valeur);
-                    free(token_s.valeur);
+                    add_token(list, token_s);
                     index_word = 0;
                     reset_word(word); // Réinitialiser le mot
                     specifique = 1;
@@ -220,10 +230,11 @@ void analyser_lexical(char *file)
 
                     Token token_ch; // crée le token caractère
                     token_ch.type = TOKEN_CHAR;
+                    token_ch.ligne = numero_ligne;
                     token_ch.valeur = malloc(strlen(word) + 1);
                     strcpy(token_ch.valeur, word);
                     printf("TOKEN_CHAR: \"%s\"\n", token_ch.valeur);
-                    free(token_ch.valeur);
+                    add_token(list, token_ch);
                     index_word = 0;
                     reset_word(word); // Réinitialiser le mot
                     specifique = 1;
@@ -317,10 +328,11 @@ void analyser_lexical(char *file)
                 word[index_word] = '\0'; // Terminer le mot
                 Token token_n;           // Créer le token nombre
                 token_n.type = TOKEN_NUMBER;
+                token_n.ligne = numero_ligne;
                 token_n.valeur = malloc(strlen(word) + 1);
                 strcpy(token_n.valeur, word);
                 printf("TOKEN_NUMBER: \"%s\"\n", token_n.valeur);
-                free(token_n.valeur);
+                add_token(list, token_n);
                 index_word = 0;
                 reset_word(word); // Réinitialiser le mot
                 specifique = 1;
@@ -337,20 +349,22 @@ void analyser_lexical(char *file)
                     index_word = 0;
                     Token token_pp; // crée le token préprocesseur
                     token_pp.type = TOKEN_PREPROCESSOR;
+                    token_pp.ligne = numero_ligne;
                     token_pp.valeur = malloc(strlen("#include") + 1);
                     strcpy(token_pp.valeur, "#include");
+                    add_token(list, token_pp);
                     printf("TOKEN_PREPROCESSOR: \"%s\"\n", token_pp.valeur);
-                    free(token_pp.valeur);
                     reset_word(word); // Réinitialiser le mot
                 }
                 else if (find_key_word(word) != -1)
                 {
                     Token token_k;
                     token_k.type = TOKEN_KEYWORD;
+                    token_k.ligne = numero_ligne;
                     token_k.valeur = malloc(strlen(word) + 1);
                     strcpy(token_k.valeur, word);
                     printf("TOKEN_KEYWORD: \"%s\"\n", token_k.valeur);
-                    free(token_k.valeur);
+                    add_token(list, token_k);
                     index_word = 0;
                     reset_word(word); // Réinitialiser le mot
                 }
@@ -358,15 +372,20 @@ void analyser_lexical(char *file)
                 {
                     Token token_o;
                     token_o.type = TOKEN_OPERATOR;
+                    token_o.ligne = numero_ligne;
                     token_o.valeur = malloc(strlen(word) + 1);
                     strcpy(token_o.valeur, word);
                     printf("TOKEN_OPERATOR: \"%s\"\n", token_o.valeur);
-                    free(token_o.valeur);
+                    add_token(list, token_o);
                     index_word = 0;
                     reset_word(word); // Réinitialiser le mot
                 }
             }
             index_buffer++;
+        }
+        if (buffer[index_buffer] == '\n')
+        {
+            numero_ligne++;
         }
         if (buffer[index_buffer] != '\0')
         {
@@ -374,10 +393,11 @@ void analyser_lexical(char *file)
             {
                 Token token_i;
                 token_i.type = TOKEN_IDENTIFIER;
+                token_i.ligne = numero_ligne;
                 token_i.valeur = malloc(strlen(word) + 1);
                 strcpy(token_i.valeur, word);
                 printf("TOKEN_IDENTIFIER: \"%s\"\n", token_i.valeur);
-                free(token_i.valeur);
+                add_token(list, token_i);
             }
 
             reset_word(word); // Réinitialiser le mot
@@ -390,19 +410,21 @@ void analyser_lexical(char *file)
                 temp[1] = '\0';
                 Token token_p;
                 token_p.type = TOKEN_PUNCTUATION;
+                token_p.ligne = numero_ligne;
                 token_p.valeur = malloc(strlen(temp) + 1);
                 strcpy(token_p.valeur, temp);
                 printf("TOKEN_PUNCTUATION: \"%s\"\n", token_p.valeur);
-                free(token_p.valeur);
+                add_token(list, token_p);
             }
             else if (find_operator(word) != -1)
             {
                 Token token_o;
                 token_o.type = TOKEN_OPERATOR;
+                token_o.ligne = numero_ligne;
                 token_o.valeur = malloc(strlen(word) + 1);
                 strcpy(token_o.valeur, word);
                 printf("TOKEN_OPERATOR: \"%s\"\n", token_o.valeur);
-                free(token_o.valeur);
+                add_token(list, token_o);
                 index_word = 0;
                 reset_word(word); // Réinitialiser le mot
             }

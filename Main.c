@@ -42,15 +42,19 @@ char *Read_file(const char *nom_fichier)
 
 int main()
 {
-    char *buffer = NULL;
-    char nom_fichier[] = "Test.txt";
-    buffer = Read_file(nom_fichier);
-    printf("\n\n\n %s \n\n\n", buffer);
-
-    if (buffer != NULL)
+    char *buffer = Read_file("lexer.c");
+    if (buffer)
     {
-        analyser_lexical(buffer);
-        free(buffer); // Libérer la mémoire après utilisation
+        TokenList *list = malloc(sizeof(TokenList));
+        list->tokens = NULL;
+        list->count = 0;
+        lexer(buffer, list);
+        for (int i = 0; i < list->count; ++i)
+        {
+            printf("TOKEN[%d] type=%d ligne=%d valeur=%s\n", i, list->tokens[i].type, list->tokens[i].ligne, list->tokens[i].valeur);
+        }
+        free_token_list(list);
+        free(buffer);
     }
     return 0;
 }
