@@ -115,6 +115,20 @@ char *reset_word(char word[100])
     }
 }
 
+void doubleOperator(char op1, char op2, char word[100], int n, TokenList *list)
+{
+    word[0] = op1;
+    word[1] = op2;
+    word[2] = '\0';
+    Token token_o; // crée le token opérateur
+    token_o.type = TOKEN_OPERATOR;
+    token_o.ligne = n;
+    token_o.valeur = malloc(strlen(word) + 1);
+    strcpy(token_o.valeur, word);
+    printf("TOKEN_OPERATOR: \"%s\"\n", token_o.valeur);
+    add_token(list, token_o);
+}
+
 void lexer(char *file, TokenList *list)
 {
     char *buffer = file;
@@ -130,11 +144,10 @@ void lexer(char *file, TokenList *list)
         while (buffer[index_buffer] == ' ' || buffer[index_buffer] == '\n' || buffer[index_buffer] == '\t')
         {
             index_buffer++;
-        }
-
-        if (buffer[index_buffer] == '\n')
-        {
-            numero_ligne++;
+            if (buffer[index_buffer] == '\n')
+            {
+                numero_ligne++; // on saute le */
+            }
         }
 
         while (buffer[index_buffer] == '/' && buffer[index_buffer + 1] == '/') // Gestion des commentaires
@@ -156,6 +169,10 @@ void lexer(char *file, TokenList *list)
             while (buffer[index_buffer] != '\0' && buffer[index_buffer] != '*' && buffer[index_buffer + 1] != '/') // lit toute la chaine
             {
                 index_buffer++;
+                if (buffer[index_buffer] == '\n')
+                {
+                    numero_ligne++; // on saute le */
+                }
             }
             if (buffer[index_buffer] != '\0')
             {
@@ -344,19 +361,7 @@ void lexer(char *file, TokenList *list)
                 word[index_word + 1] = '\0'; // Terminer le mot
                 index_word++;
 
-                if (strcmp(word, "#include") == 0 || strcmp(word, "#define") == 0) // Gestion #include
-                {
-                    index_word = 0;
-                    Token token_pp; // crée le token préprocesseur
-                    token_pp.type = TOKEN_PREPROCESSOR;
-                    token_pp.ligne = numero_ligne;
-                    token_pp.valeur = malloc(strlen("#include") + 1);
-                    strcpy(token_pp.valeur, "#include");
-                    add_token(list, token_pp);
-                    printf("TOKEN_PREPROCESSOR: \"%s\"\n", token_pp.valeur);
-                    reset_word(word); // Réinitialiser le mot
-                }
-                else if (find_key_word(word) != -1)
+                if (find_key_word(word) != -1)
                 {
                     Token token_k;
                     token_k.type = TOKEN_KEYWORD;
@@ -387,6 +392,217 @@ void lexer(char *file, TokenList *list)
         {
             numero_ligne++;
         }
+        else if (buffer[index_buffer] == '#') // Gestion des préprocesseurs
+        {
+            index_word = 0;
+            word[index_word] = buffer[index_buffer];
+            index_buffer++;
+            index_word++;
+
+            while (buffer[index_buffer] != '\0' && buffer[index_buffer] != '\n' && buffer[index_buffer] != ' ') // lit toute la chaine
+            {
+                word[index_word] = buffer[index_buffer];
+                index_word++;
+                index_buffer++;
+            }
+            word[index_word] = '\0'; // Terminer le mot
+
+            Token token_pp; // crée le token préprocesseur
+            token_pp.type = TOKEN_PREPROCESSOR;
+            token_pp.ligne = numero_ligne;
+            token_pp.valeur = malloc(strlen(word) + 1);
+            strcpy(token_pp.valeur, word);
+            printf("TOKEN_PREPROCESSOR: \"%s\"\n", token_pp.valeur);
+            add_token(list, token_pp);
+            index_word = 0;
+            reset_word(word); // Réinitialiser le mot
+            specifique = 1;
+        }
+        else if (buffer[index_buffer] == '+' && buffer[index_buffer + 1] == '+') // Gestion des opérateurs ++ et --
+        {
+            doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+            index_buffer += 2;
+            index_word = 0;
+            reset_word(word); // Réinitialiser le mot
+            specifique = 1;
+        }
+        else if (buffer[index_buffer] == '-' && buffer[index_buffer + 1] == '-') // Gestion des opérateurs ++ et --
+        {
+            doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+            index_buffer += 2;
+            index_word = 0;
+            reset_word(word); // Réinitialiser le mot
+            specifique = 1;
+        }
+        else if (buffer[index_buffer] == '=' && buffer[index_buffer + 1] == '=') // Gestion des opérateurs ++ et --
+        {
+            doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+            index_buffer += 2;
+            index_word = 0;
+            reset_word(word); // Réinitialiser le mot
+            specifique = 1;
+        }
+        else if (buffer[index_buffer] == '+' && buffer[index_buffer + 1] == '=') // Gestion des opérateurs ++ et --
+        {
+            doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+            index_buffer += 2;
+            index_word = 0;
+            reset_word(word); // Réinitialiser le mot
+            specifique = 1;
+        }
+        else if (buffer[index_buffer] == '-' && buffer[index_buffer + 1] == '=') // Gestion des opérateurs ++ et --
+        {
+            doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+            index_buffer += 2;
+            index_word = 0;
+            reset_word(word); // Réinitialiser le mot
+            specifique = 1;
+        }
+        else if (buffer[index_buffer] == '*' && buffer[index_buffer + 1] == '=') // Gestion des opérateurs ++ et --
+        {
+            doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+            index_buffer += 2;
+            index_word = 0;
+            reset_word(word); // Réinitialiser le mot
+            specifique = 1;
+        }
+        else if (buffer[index_buffer] == '/' && buffer[index_buffer + 1] == '=') // Gestion des opérateurs ++ et --
+        {
+            doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+            index_buffer += 2;
+            index_word = 0;
+            reset_word(word); // Réinitialiser le mot
+            specifique = 1;
+        }
+        else if (buffer[index_buffer] == '>' && buffer[index_buffer + 1] == '=') // Gestion des opérateurs ++ et --
+        {
+            doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+            index_buffer += 2;
+            index_word = 0;
+            reset_word(word); // Réinitialiser le mot
+            specifique = 1;
+        }
+        else if (buffer[index_buffer] == '<' && buffer[index_buffer + 1] == '=') // Gestion des opérateurs ++ et --
+        {
+            doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+            index_buffer += 2;
+            index_word = 0;
+            reset_word(word); // Réinitialiser le mot
+            specifique = 1;
+        }
+        else if (buffer[index_buffer] == '!' && buffer[index_buffer + 1] == '=') // Gestion des opérateurs ++ et --
+        {
+            doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+            index_buffer += 2;
+            index_word = 0;
+            reset_word(word); // Réinitialiser le mot
+            specifique = 1;
+        }
+        else if (buffer[index_buffer] == '&' && buffer[index_buffer + 1] == '&') // Gestion des opérateurs ++ et --
+        {
+            doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+            index_buffer += 2;
+            index_word = 0;
+            reset_word(word); // Réinitialiser le mot
+            specifique = 1;
+        }
+        else if (buffer[index_buffer] == '|' && buffer[index_buffer + 1] == '|') // Gestion des opérateurs ++ et --
+        {
+            doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+            index_buffer += 2;
+            index_word = 0;
+            reset_word(word); // Réinitialiser le mot
+            specifique = 1;
+        }
+        else if (buffer[index_buffer] == '>' && buffer[index_buffer + 1] == '>') // Gestion des opérateurs >> et <<
+        {
+            doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+            index_buffer += 2;
+            index_word = 0;
+            reset_word(word); // Réinitialiser le mot
+            specifique = 1;
+        }
+        else if (buffer[index_buffer] == '<' && buffer[index_buffer + 1] == '<') // Gestion des opérateurs >> et <<
+        {
+            doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+            index_buffer += 2;
+            index_word = 0;
+            reset_word(word); // Réinitialiser le mot
+            specifique = 1;
+        }
+        else if (buffer[index_buffer] == '&' && buffer[index_buffer + 1] == '=') // Gestion des opérateurs >> et <<
+        {
+            doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+            index_buffer += 2;
+            index_word = 0;
+            reset_word(word); // Réinitialiser le mot
+            specifique = 1;
+        }
+        else if (buffer[index_buffer] == '^' && buffer[index_buffer + 1] == '=') // Gestion des opérateurs >> et <<
+        {
+            doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+            index_buffer += 2;
+            index_word = 0;
+            reset_word(word); // Réinitialiser le mot
+            specifique = 1;
+        }
+        else if (buffer[index_buffer] == '|' && buffer[index_buffer + 1] == '=') // Gestion des opérateurs >> et <<
+        {
+            doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+            index_buffer += 2;
+            index_word = 0;
+            reset_word(word); // Réinitialiser le mot
+            specifique = 1;
+        }
+        else if (buffer[index_buffer] == '%' && buffer[index_buffer + 1] == '=') // Gestion des opérateurs >> et <<
+        {
+            doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+            index_buffer += 2;
+            index_word = 0;
+            reset_word(word); // Réinitialiser le mot
+            specifique = 1;
+        }
+        else if (buffer[index_buffer] == '=' && buffer[index_buffer + 1] == '>') // Gestion des opérateurs >> et <<
+        {
+            doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+            index_buffer += 2;
+            index_word = 0;
+            reset_word(word); // Réinitialiser le mot
+            specifique = 1;
+        }
+        else if (buffer[index_buffer] == ':' && buffer[index_buffer + 1] == ':') // Gestion des opérateurs >> et <<
+        {
+            doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+            index_buffer += 2;
+            index_word = 0;
+            reset_word(word); // Réinitialiser le mot
+            specifique = 1;
+        }
+        else if (buffer[index_buffer] == '>' && buffer[index_buffer + 1] == '-') // Gestion des opérateurs >> et <<
+        {
+            doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+            index_buffer += 2;
+            index_word = 0;
+            reset_word(word); // Réinitialiser le mot
+            specifique = 1;
+        }
+        else if (buffer[index_buffer] == ':' && buffer[index_buffer + 1] == '=') // Gestion des opérateurs >> et <<
+        {
+            doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+            index_buffer += 2;
+            index_word = 0;
+            reset_word(word); // Réinitialiser le mot
+            specifique = 1;
+        }
+        else if (buffer[index_buffer] == '=' && buffer[index_buffer + 1] == '>') // Gestion des opérateurs >> et <<
+        {
+            doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+            index_buffer += 2;
+            index_word = 0;
+            reset_word(word); // Réinitialiser le mot
+            specifique = 1;
+        }
+
         if (buffer[index_buffer] != '\0')
         {
             if (word[0] != '\0' && word != NULL)

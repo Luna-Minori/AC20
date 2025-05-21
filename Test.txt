@@ -13,5 +13,8 @@ int main (){
     char *text = "Hello"; /* rbfauhfbifanfozf */
     float oui = 1.2;
     coucou(lettre);
+    if(nombre == 1){
+        miam++;
+    }
     return nombre;
 }
