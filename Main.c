@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "lexer.h"
+#include "Lexer/lexer.h"
+#include "Parser/parser.h"
 
 char *Read_file(const char *nom_fichier)
 {
@@ -42,7 +43,7 @@ char *Read_file(const char *nom_fichier)
 
 int main()
 {
-    char *buffer = Read_file("lexer.c");
+    char *buffer = Read_file("test.txt");
     if (buffer)
     {
         TokenList *list = malloc(sizeof(TokenList));
@@ -53,6 +54,8 @@ int main()
         {
             printf("TOKEN[%d] type=%d ligne=%d valeur=%s\n", i, list->tokens[i].type, list->tokens[i].ligne, list->tokens[i].valeur);
         }
+
+        parser(list);
         free_token_list(list);
         free(buffer);
     }

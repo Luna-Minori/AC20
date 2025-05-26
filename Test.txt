@@ -13,7 +13,15 @@ int main (){
     char *text = "Hello"; /* rbfauhfbifanfozf */
     float oui = 1.2;
     coucou(lettre);
+    nombre = nombre + nombre2;
+    nombre += nombre2;
     if(nombre == 1){
+        miam++;
+    }    
+    if(nombre == 1) {
+        miam++;
+    }
+    if((nombre == 1 && 1 == 1) || 5 == 5) {
         miam++;
     }
     return nombre;

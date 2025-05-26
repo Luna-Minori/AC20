@@ -10,8 +10,10 @@ CFLAGS = -Wall -Wextra -g
 # Commande pour supprimer des fichiers
 RM = rm -f
 
-# Fichiers sources et objets
-SRC = Main.c lexer.c
+# Fichiers sources
+SRC = Main.c Lexer/lexer.c Parser/parser.c utils.c
+
+# Fichiers objets (automatiquement générés depuis les sources)
 OBJ = $(SRC:.c=.o)
 
 # Règle par défaut (compile et exécute)

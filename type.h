@@ -1,11 +1,12 @@
-#ifndef LEXER_H
-#define LEXER_H
+#ifndef TYPE_H
+#define TYPE_H
 
 typedef enum
 {
     TOKEN_KEYWORD,
     TOKEN_IDENTIFIER,
     TOKEN_OPERATOR,
+    TOKEN_ASSIGNMENT,
     TOKEN_NUMBER,
     TOKEN_STRING,
     TOKEN_CHAR,
@@ -15,18 +16,17 @@ typedef enum
     TOKEN_END
 } TokenType;
 
-typedef struct {
+typedef struct
+{
     TokenType type;
     int ligne;
     char *valeur;
 } Token;
 
-typedef struct {
+typedef struct
+{
     Token *tokens;
     int count;
 } TokenList;
 
-void lexer(char *buffer, TokenList *list);
-void free_token_list(TokenList *list);
-
-#endif // LEXER_H
+#endif
