@@ -24,5 +24,12 @@ int main (){
     if((nombre == 1 && 1 == 1) || 5 == 5) {
         miam++;
     }
+    int i = 0;
+    while(i < 4){
+        i++
+    }
+    for(int j = 0; j < 5; j++){
+        printf();
+    }
     return nombre;
 }

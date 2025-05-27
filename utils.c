@@ -1,6 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "type.h"
+
+int is_pointvirgule(Token t) { return t.type == TOKEN_PUNCTUATION && strcmp(t.valeur, ";") == 0; }
+
+int is_crochet(Token t) { return t.type == TOKEN_PUNCTUATION && (strcmp(t.valeur, "{") == 0 || strcmp(t.valeur, "}") == 0); }
+
+int is_openingParenthesis(Token t) { return t.type == TOKEN_PUNCTUATION && strcmp(t.valeur, "(") == 0; }
+
+int is_closingParenthesis(Token t) { return t.type == TOKEN_PUNCTUATION && strcmp(t.valeur, ")") == 0; }
+
+int is_openingBrace(Token t) { return t.type == TOKEN_PUNCTUATION && strcmp(t.valeur, "{") == 0; }
+
+int is_closingBrace(Token t) { return t.type == TOKEN_PUNCTUATION && strcmp(t.valeur, "}") == 0; }
+
+int is_token_pointvirgule(TokenList *t, int *index)
+{
+    if (*index >= t->count)
+        return 0;
+    return is_pointvirgule(t->tokens[*index]);
+}
 
 int taille_liste(const char *liste[])
 {

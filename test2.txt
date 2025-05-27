@@ -1,0 +1,8 @@
+    int nombre = 01; // Hello
+    int nombre2 = 2555;
+    char lettre = 'c';
+    char *text = "Hello"; /* rbfauhfbifanfozf */
+    float oui = 1.2;
+    coucou(lettre);
+    nombre = nombre + nombre2;
+    nombre += nombre2;

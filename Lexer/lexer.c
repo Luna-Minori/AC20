@@ -400,21 +400,8 @@ void lexer(char *file, TokenList *list)
 
             reset_word(word); // Réinitialiser le mot
             word[0] = buffer[index_buffer];
-            word[1] = '\0'; // Terminer le mot
-            if (find_puntuation(buffer[index_buffer]) != -1)
-            {
-                char temp[2];
-                temp[0] = buffer[index_buffer];
-                temp[1] = '\0';
-                Token token_p;
-                token_p.type = TOKEN_PUNCTUATION;
-                token_p.ligne = numero_ligne;
-                token_p.valeur = malloc(strlen(temp) + 1);
-                strcpy(token_p.valeur, temp);
-                printf("TOKEN_PUNCTUATION: \"%s\"\n", token_p.valeur);
-                add_token(list, token_p);
-            }
-            else if (find_duo_operator(buffer[index_buffer], buffer[index_buffer + 1]) != -1) // Gestion des opérateurs ++ et --
+            word[1] = '\0';                                                              // Terminer le mot
+            if (find_duo_operator(buffer[index_buffer], buffer[index_buffer + 1]) != -1) // Gestion des opérateurs ++ et --
             {
                 doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
                 index_buffer += 2;
@@ -447,6 +434,19 @@ void lexer(char *file, TokenList *list)
                 index_word = 0;
                 reset_word(word);
                 specifique = 1;
+            }
+            if (find_puntuation(buffer[index_buffer]) != -1)
+            {
+                char temp[2];
+                temp[0] = buffer[index_buffer];
+                temp[1] = '\0';
+                Token token_p;
+                token_p.type = TOKEN_PUNCTUATION;
+                token_p.ligne = numero_ligne;
+                token_p.valeur = malloc(strlen(temp) + 1);
+                strcpy(token_p.valeur, temp);
+                printf("TOKEN_PUNCTUATION: \"%s\"\n", token_p.valeur);
+                add_token(list, token_p);
             }
             index_buffer++;
         }

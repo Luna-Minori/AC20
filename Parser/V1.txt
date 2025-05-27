@@ -1,0 +1,468 @@
+/*
+int is_expression(TokenList *ligne)
+{
+    if (!ligne || ligne->count == 0)
+        return 0;
+
+    int search_operator = 0;
+    int parenthesis_balance = 0;
+
+    for (int i = 0; i < ligne->count; ++i)
+    {
+        Token current = ligne->tokens[i];
+
+        // Fin d'expression explicite
+        if (is_pointvirgule(current))
+        {
+            return parenthesis_balance == 0 && search_operator == 1;
+        }
+
+        if (is_openingParenthesis(current))
+        {
+            parenthesis_balance++;
+            continue;
+        }
+
+        if (is_closingParenthesis(current))
+        {
+            parenthesis_balance--;
+            if (parenthesis_balance < 0)
+                return 0; // trop de ')'
+            continue;
+        }
+
+        if (!search_operator)
+        {
+            if (is_valide_operande(current))
+            {
+                search_operator = 1;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        else
+        {
+            int single_op = find_single_operator(current.valeur);
+            int duo_op = -1;
+            if (current.valeur[1] != '\0')
+                duo_op = find_duo_operator(current.valeur[0], current.valeur[1]);
+
+            if (single_op != -1 || duo_op != -1)
+            {
+                search_operator = 0;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+    }
+
+    // Si on arrive ici sans point-virgule mais expression bien formée
+    return search_operator == 1 && parenthesis_balance == 0;
+} */
+
+/*
+int is_assignment(TokenList *ligne)
+{
+    if (ligne == NULL && ligne->count < 3)
+        return 0;
+    // identifiant, un opérateur d'assignation et une expression
+    if (ligne->tokens[0].type == TOKEN_IDENTIFIER && ligne->tokens[1].type == TOKEN_ASSIGNMENT)
+    {
+        // On vérifie que le token suivant est une expression
+        TokenList sub_ligne;
+        sub_ligne.tokens = &ligne->tokens[2]; // On ignore les deux premiers tokens
+        sub_ligne.count = ligne->count - 2;
+
+        if (sub_ligne.count == 0)
+            return 0; // Pas d'expression après l'assignation
+
+        // Vérifier si la sous-ligne est une expression valide
+        if (is_expression(&sub_ligne))
+            return 1; // C'est une assignation valide
+        else
+            return 0; // Pas une assignation valide
+    }
+    return 0; // Pas une assignation valide
+}
+
+
+int is_declaration(TokenList *ligne)
+{
+    if (ligne == NULL || ligne->count < 2)
+        return 0;
+
+    // Vérifier si le premier token est un type (int, float, etc.)
+    if (ligne->tokens[0].type == TOKEN_KEYWORD &&
+        is_type(ligne->tokens[0].valeur) != -1)
+    {
+        // Vérifie que le token suivant est un identifiant
+        if (ligne->tokens[1].type != TOKEN_IDENTIFIER)
+            return 0;
+
+        // Vérifie si l'assignation est présente après
+        if (ligne->count >= 3)
+        {
+            TokenList sub_ligne;
+            sub_ligne.tokens = &ligne->tokens[2];
+            sub_ligne.count = ligne->count - 2;
+
+            if (is_assignment(&sub_ligne))
+                return 1; // Déclaration avec affectation
+        }
+
+        // Même sans affectation, une déclaration comme "int x;" est valide
+        return 1;
+    }
+
+    return 0; // Ce n’est pas une déclaration
+}
+
+void aff(TokenList *ligne)
+{
+    if (ligne == NULL || ligne->count == 0)
+    {
+        printf("Ligne vide ou NULL\n");
+        return;
+    }
+
+    printf("\nLigne: ");
+    for (int i = 0; i < ligne->count; ++i)
+    {
+        printf("%s ", ligne->tokens[i].valeur);
+    }
+}
+
+int is_conditionIf(TokenList *ligne)
+{
+    if (ligne == NULL || ligne->count < 5)
+        return 0;
+
+    int keyword = ligne->tokens[0].type == TOKEN_KEYWORD && strcmp(ligne->tokens[0].valeur, "if") == 0;
+    int openingParenthesis = is_openingParenthesis(ligne->tokens[1]);
+    int closingParenthesis = is_closingParenthesis(ligne->tokens[ligne->count - 2]);
+    int openingBrace = is_openingBrace(ligne->tokens[ligne->count - 1]);
+
+    // Préparer une sous-liste entre les parenthèses
+    int sub_count = ligne->count - 4; // if ( ... ) {
+    if (sub_count <= 0)
+        return 0;
+
+    TokenList sub_ligne;
+    sub_ligne.count = sub_count;
+    sub_ligne.tokens = malloc(sizeof(Token) * sub_count);
+
+    for (int i = 0; i < sub_count; i++)
+    {
+        sub_ligne.tokens[i] = ligne->tokens[i + 2]; // tokens entre les parenthèses
+    }
+
+    int expression = is_expression(&sub_ligne);
+    free(sub_ligne.tokens); // éviter fuite mémoire
+
+    if (keyword && openingParenthesis && closingParenthesis && openingBrace && expression)
+        return 1;
+
+    return 0;
+}
+
+int is_while(TokenList *ligne)
+{
+    if (ligne == NULL || ligne->count < 5)
+        return 0;
+
+    int keyword = ligne->tokens[0].type == TOKEN_KEYWORD && strcmp(ligne->tokens[0].valeur, "while") == 0;
+    int openingParenthesis = is_openingParenthesis(ligne->tokens[1]);
+    int closingParenthesis = is_closingParenthesis(ligne->tokens[ligne->count - 2]);
+    int openingBrace = is_openingBrace(ligne->tokens[ligne->count - 1]);
+
+    // Préparer une sous-liste entre les parenthèses
+    int sub_count = ligne->count - 4; // while ( ... ) {
+    if (sub_count <= 0)
+        return 0;
+
+    TokenList sub_ligne;
+    sub_ligne.count = sub_count;
+    sub_ligne.tokens = malloc(sizeof(Token) * sub_count);
+
+    for (int i = 0; i < sub_count; i++)
+    {
+        sub_ligne.tokens[i] = ligne->tokens[i + 2]; // tokens entre les parenthèses
+    }
+
+    int expression = is_expression(&sub_ligne);
+    free(sub_ligne.tokens); // éviter fuite mémoire
+
+    if (keyword && openingParenthesis && closingParenthesis && openingBrace && expression)
+        return 1;
+
+    return 0;
+}
+
+int is_for(TokenList *ligne)
+{
+    if (ligne == NULL || ligne->count < 7) // for ( ; ; ) { = 7 tokens minimum
+        return 0;
+
+    // Vérification de la structure de base
+    int keyword = ligne->tokens[0].type == TOKEN_KEYWORD && strcmp(ligne->tokens[0].valeur, "for") == 0;
+    int openingParenthesis = is_openingParenthesis(ligne->tokens[1]);
+    int closingParenthesis = is_closingParenthesis(ligne->tokens[ligne->count - 2]);
+    int openingBrace = is_openingBrace(ligne->tokens[ligne->count - 1]);
+
+    if (!(keyword && openingParenthesis && closingParenthesis && openingBrace))
+        return 0;
+
+    // Récupérer les tokens entre les parenthèses
+    int start = 2;
+    int end = ligne->count - 2;
+
+    // Compter les points-virgules à l'intérieur
+    int semicolon_indices[2] = {-1, -1};
+    int found = 0;
+
+    for (int i = start; i < end; i++)
+    {
+        if (is_pointvirgule(ligne->tokens[i]))
+        {
+            if (found < 2)
+                semicolon_indices[found++] = i;
+        }
+    }
+
+    if (found != 2)
+    {
+        printf("Erreur : mauvaise structure de for (il faut deux `;` dans les parenthèses).\n");
+        return 0;
+    }
+
+    // Préparer les trois parties (init ; condition ; incrément)
+    TokenList init, condition, increment;
+
+    // INIT
+    init.count = semicolon_indices[0] - start;
+    init.tokens = malloc(sizeof(Token) * init.count);
+    for (int i = 0; i < init.count; i++)
+    {
+        init.tokens[i] = ligne->tokens[i + 2];
+    }
+
+    // CONDITION
+    condition.count = semicolon_indices[1] - semicolon_indices[0] - 1;
+    condition.tokens = malloc(sizeof(Token) * condition.count);
+    for (int i = 0; i < condition.count; i++)
+    {
+        condition.tokens[i] = ligne->tokens[semicolon_indices[0] + 1 + i];
+    }
+
+    // INCREMENT
+    increment.count = end - semicolon_indices[1] - 1;
+    increment.tokens = malloc(sizeof(Token) * increment.count);
+    for (int i = 0; i < increment.count; i++)
+    {
+        increment.tokens[i] = ligne->tokens[semicolon_indices[1] + 1 + i];
+    }
+
+    // Vérifier si l'expression de condition est valide
+
+    int expr_valid = is_expression(&condition); // tu peux aussi valider init/incrément si besoin
+    if (keyword && openingParenthesis && closingParenthesis && openingBrace && expr_valid)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+int analyse_ligne(TokenList *ligne)
+{
+    if (ligne == NULL || ligne->count == 0)
+        return 1;
+
+    // Détecter bloc
+    if (is_openingBrace(ligne->tokens[0]) && is_closingBrace(ligne->tokens[ligne->count - 1]))
+    {
+        printf("Bloc détecté avec %d tokens\n", ligne->count);
+        printf("Contenu du bloc : ");
+        for (int i = 0; i < ligne->count; ++i)
+        {
+            printf("%s ", ligne->tokens[i].valeur);
+        }
+        if (ligne->count > 2)
+        {
+            printf("\nAnalyse du bloc :\n");
+            TokenList *sous_bloc = malloc(sizeof(TokenList));
+            sous_bloc->count = ligne->count - 2;
+            sous_bloc->tokens = malloc(sizeof(Token) * sous_bloc->count);
+            memcpy(sous_bloc->tokens, &ligne->tokens[1], sizeof(Token) * sous_bloc->count);
+            aff(sous_bloc);
+            printf("\nAnalyse du contenu du bloc :\n");
+            parser(sous_bloc); // appel récursif au parser
+
+            free(sous_bloc->tokens);
+            free(sous_bloc);
+        }
+        return 0;
+    }
+
+    if (is_expression(ligne))
+    {
+        // traitement de l'expression
+        aff(ligne);
+        printf("\nExpression valide");
+        return 0;
+    }
+    if (is_assignment(ligne))
+    {
+        // traitement de l'assignation
+        aff(ligne);
+        printf("\nAssignation valide");
+        return 0;
+    }
+    if (is_declaration(ligne))
+    {
+        // traitement de la déclaration
+        aff(ligne);
+        printf("\nDeclaration valide");
+        return 0;
+    }
+    if (is_conditionIf(ligne))
+    {
+        // traitement de la condition if
+        aff(ligne);
+        printf("\nCondition if valide");
+        return 0;
+    }
+    if (is_while(ligne))
+    {
+        // traitement de la condition while
+        aff(ligne);
+        printf("\nCondition while valide");
+        return 0;
+    }
+    if (is_for(ligne))
+    {
+        // traitement de la condition for
+        aff(ligne);
+        printf("\nCondition for valide");
+        return 0;
+    }
+
+    return 1;
+}
+*/
+
+
+/*
+void parser(TokenList *list)
+{
+    if (list == NULL || list->count == 0)
+        return;
+
+    int inside_for = 0;
+    int parenthesis = 0;
+    int brace_level = 0; // Niveau d'accolades pour gérer les blocs
+
+    TokenList *ligne = malloc(sizeof(TokenList));
+    ligne->tokens = NULL;
+    ligne->count = 0;
+
+    for (int i = 0; i < list->count; ++i)
+    {
+        Token current = list->tokens[i];
+
+        // Ajout du token actuel
+        ligne->tokens = realloc(ligne->tokens, sizeof(Token) * (ligne->count + 1));
+        ligne->tokens[ligne->count++] = current;
+        if (is_openingBrace(current))
+        {
+            brace_level++;
+        }
+        else if (is_closingBrace(current))
+        {
+            brace_level--;
+
+            if (brace_level < 0)
+            {
+                printf("Erreur : accolade fermante sans ouvrante correspondante\n");
+                // Gérer l'erreur ou sortir
+                brace_level = 0; // remise à zéro pour continuer proprement
+            }
+
+            // Si on vient de fermer un bloc (niveau 0)
+            if (brace_level == 0)
+            {
+                analyse_ligne(ligne);
+
+                free(ligne->tokens);
+                ligne->tokens = NULL;
+                ligne->count = 0;
+            }
+        }
+        if (!inside_for && current.type == TOKEN_KEYWORD && strcmp(current.valeur, "for") == 0)
+        {
+            inside_for = 1;
+            parenthesis = 0;
+        }
+
+        if (inside_for)
+        {
+            if (is_openingParenthesis(current))
+                parenthesis++;
+            else if (is_closingParenthesis(current))
+                parenthesis--;
+
+            // Vérification sûre d'accès pour next token
+            if (i + 1 < list->count)
+            {
+                Token next = list->tokens[i + 1];
+
+                if (is_openingBrace(next) && parenthesis == 0)
+                {
+                    // Ajouter next dans ligne
+                    Token *tmp = realloc(ligne->tokens, sizeof(Token) * (ligne->count + 1));
+                    if (tmp == NULL)
+                    {
+                        perror("realloc failed");
+                        free(ligne->tokens);
+                        free(ligne);
+                        exit(EXIT_FAILURE);
+                    }
+                    ligne->tokens = tmp;
+                    ligne->tokens[ligne->count++] = next;
+                    i++; // on consomme next
+
+                    inside_for = 0;
+                    analyse_ligne(ligne);
+
+                    free(ligne->tokens);
+                    ligne->tokens = NULL;
+                    ligne->count = 0;
+
+                    continue; // ne pas traiter current à nouveau
+                }
+            }
+            continue; // On attend la fin du for, pas de traitement normal
+        }
+
+        if (is_pointvirgule(current) || is_crochet(current))
+        {
+            analyse_ligne(ligne);
+            free(ligne->tokens);
+            ligne->tokens = NULL;
+            ligne->count = 0;
+        }
+    }
+
+    // Traiter dernière ligne si non vide (ex:  pas de ; à la fin)
+    if (ligne->count > 0)
+    {
+        aff(ligne);
+        analyse_ligne(ligne);
+        free(ligne->tokens);
+    }
+    free(ligne);
+}
+*/

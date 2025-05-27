@@ -60,6 +60,7 @@
     "*.dbclient-js": "javascript",
     "stdio.h": "c",
     "parser.h": "c",
-    "lexer.h": "c"
+    "lexer.h": "c",
+    "expression.h": "c"
   }
 }

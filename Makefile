@@ -11,7 +11,7 @@ CFLAGS = -Wall -Wextra -g
 RM = rm -f
 
 # Fichiers sources
-SRC = Main.c Lexer/lexer.c Parser/parser.c utils.c
+SRC = Main.c Lexer/lexer.c Parser/parser.c Parser/instruction.c Parser/expression.c Parser/control_structures.c   utils.c
 
 # Fichiers objets (automatiquement générés depuis les sources)
 OBJ = $(SRC:.c=.o)

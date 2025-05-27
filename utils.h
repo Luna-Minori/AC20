@@ -1,6 +1,14 @@
 #ifndef UTILS_H
 #define UTILS_H
+#include "type.h"
 
+int is_pointvirgule(Token t);
+int is_crochet(Token t);
+int is_openingParenthesis(Token t);
+int is_closingParenthesis(Token t);
+int is_openingBrace(Token t);
+int is_closingBrace(Token t);
+int is_token_pointvirgule(TokenList *t, int *index);
 int taille_liste(const char *liste[]);
 char find_separator(char word);
 char find_puntuation(char word);
