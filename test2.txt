@@ -1,8 +1,30 @@
-    int nombre = 01; // Hello
-    int nombre2 = 2555;
-    char lettre = 'c';
-    char *text = "Hello"; /* rbfauhfbifanfozf */
-    float oui = 1.2;
-    coucou(lettre);
-    nombre = nombre + nombre2;
-    nombre += nombre2;
+int nombre = 5;
+nombre = nombre + nombre2;
+nombre +2;
+nombre += 1;
+nombre < 3;
+if((((nombre == 5) && (oui < 2 || 5 < 8)))){
+    miam++;
+
+    if(nombre < 18){
+        miam ++;
+    }
+}
+else if( nombre <=2) {
+    maim--;
+}
+else {
+    miam + 2;
+}
+
+for(int i=0; i < 18 ; i++){
+    if(1 ==1){
+        miam--;
+    }
+}
+while(nombre ==5){
+    miam++;
+    if(nombre > 5){
+        miam++;
+    }
+}

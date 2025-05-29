@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "lexer.h"
-#include "../utils.h"
 
 void add_token(TokenList *list, Token token)
 {
@@ -51,14 +50,18 @@ void doubleOperator(char op1, char op2, char word[100], int n, TokenList *list)
     add_token(list, token_o);
 }
 
-int find_egal(char *word)
+void assigment(char op1, char op2, char word[100], int n, TokenList *list)
 {
-    const char *egal = "=";
-    if (strcmp(word, egal) == 0)
-    {
-        return 0; // Egal trouvé
-    }
-    return -1; // Egal non trouvé
+    word[0] = op1;
+    word[1] = op2;
+    word[2] = '\0';
+    Token token_o; // crée le token opérateur
+    token_o.type = TOKEN_ASSIGNMENT;
+    token_o.ligne = n;
+    token_o.valeur = malloc(strlen(word) + 1);
+    strcpy(token_o.valeur, word);
+    printf("TOKEN_ASSIGNMENT: \"%s\"\n", token_o.valeur);
+    add_token(list, token_o);
 }
 
 void lexer(char *file, TokenList *list)
@@ -316,41 +319,37 @@ void lexer(char *file, TokenList *list)
                     index_word = 0;
                     reset_word(word); // Réinitialiser le mot
                 }
-                else if (find_egal(word) != -1) // Gestion de l'égalité
+                else if (buffer[index_buffer] == '=' || find_duo_assigment(buffer[index_buffer], buffer[index_buffer + 1]) != -1) // Gestion de l'égalité
                 {
-                    Token token_a;
-                    token_a.type = TOKEN_ASSIGNMENT; // type spécial
-                    token_a.ligne = numero_ligne;
-                    token_a.valeur = malloc(2);
-                    strncpy(token_a.valeur, "=", 2);
-                    printf("TOKEN_ASSIGNMENT: \"%s\"\n", token_a.valeur);
-                    add_token(list, token_a);
-                    index_buffer++;
-                    index_word = 0;
-                    reset_word(word);
-                    specifique = 1;
+                    if (buffer[index_buffer] == '=')
+                    {
+                        Token token_a;
+                        token_a.type = TOKEN_ASSIGNMENT; // type spécial
+                        token_a.ligne = numero_ligne;
+                        token_a.valeur = malloc(2);
+                        strncpy(token_a.valeur, "=", 2);
+                        printf("TOKEN_ASSIGNMENT: \"%s\"\n", token_a.valeur);
+                        add_token(list, token_a);
+                        index_word = 0;
+                        reset_word(word);
+                        specifique = 1;
+                    }
+                    else
+                    {
+
+                        assigment(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+                        index_buffer++;
+                        index_word = 0;
+                        reset_word(word); // Réinitialiser le mot
+                        specifique = 1;
+                    }
                 }
                 else if (find_duo_operator(buffer[index_buffer], buffer[index_buffer + 1]) != -1) // Gestion des opérateurs ++ et --
                 {
                     doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
-                    index_buffer += 2;
-                    index_word = 0;
-                    reset_word(word); // Réinitialiser le mot
-                    specifique = 1;
-                }
-                else if (find_single_operator(word) != -1)
-                {
-                    // Token assignation '='
-                    Token token_o;
-                    token_o.type = TOKEN_OPERATOR; // type spécial
-                    token_o.ligne = numero_ligne;
-                    token_o.valeur = malloc(strlen(word) + 1);
-                    strcpy(token_o.valeur, word);
-                    printf("TOKEN_ASSIGNMENT: \"%s\"\n", token_o.valeur);
-                    add_token(list, token_o);
                     index_buffer++;
                     index_word = 0;
-                    reset_word(word);
+                    reset_word(word); // Réinitialiser le mot
                     specifique = 1;
                 }
             }
@@ -404,10 +403,35 @@ void lexer(char *file, TokenList *list)
             if (find_duo_operator(buffer[index_buffer], buffer[index_buffer + 1]) != -1) // Gestion des opérateurs ++ et --
             {
                 doubleOperator(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
-                index_buffer += 2;
+                index_buffer++;
                 index_word = 0;
                 reset_word(word); // Réinitialiser le mot
                 specifique = 1;
+            }
+            else if (buffer[index_buffer] == '=' || find_duo_assigment(buffer[index_buffer], buffer[index_buffer + 1]) != -1) // Gestion de l'égalité
+            {
+                if (buffer[index_buffer] == '=')
+                {
+                    Token token_a;
+                    token_a.type = TOKEN_ASSIGNMENT; // type spécial
+                    token_a.ligne = numero_ligne;
+                    token_a.valeur = malloc(2);
+                    strncpy(token_a.valeur, "=", 2);
+                    printf("TOKEN_ASSIGNMENT: \"%s\"\n", token_a.valeur);
+                    add_token(list, token_a);
+                    index_word = 0;
+                    reset_word(word);
+                    specifique = 1;
+                }
+                else
+                {
+
+                    assigment(buffer[index_buffer], buffer[index_buffer + 1], word, numero_ligne, list);
+                    index_buffer++;
+                    index_word = 0;
+                    reset_word(word); // Réinitialiser le mot
+                    specifique = 1;
+                }
             }
             else if (find_single_operator(word) != -1)
             {
@@ -420,20 +444,6 @@ void lexer(char *file, TokenList *list)
                 add_token(list, token_o);
                 index_word = 0;
                 reset_word(word); // Réinitialiser le mot
-            }
-            else if (find_egal(word) != -1) // Gestion de l'égalité
-            {
-                Token token_a;
-                token_a.type = TOKEN_ASSIGNMENT; // type spécial
-                token_a.ligne = numero_ligne;
-                token_a.valeur = malloc(2);
-                strncpy(token_a.valeur, "=", 2);
-                printf("TOKEN_ASSIGNMENT: \"%s\"\n", token_a.valeur);
-                add_token(list, token_a);
-                index_buffer++;
-                index_word = 0;
-                reset_word(word);
-                specifique = 1;
             }
             if (find_puntuation(buffer[index_buffer]) != -1)
             {

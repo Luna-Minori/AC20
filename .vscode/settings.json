@@ -61,6 +61,11 @@
     "stdio.h": "c",
     "parser.h": "c",
     "lexer.h": "c",
-    "expression.h": "c"
+    "expression.h": "c",
+    "utils.h": "c",
+    "parse_instruction.h": "c",
+    "string.h": "c",
+    "parse_controle_structures.h": "c",
+    "parse_expression.h": "c"
   }
 }

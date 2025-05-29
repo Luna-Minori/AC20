@@ -4,19 +4,28 @@ EXEC = Main.exe
 # Compilateur
 CC = gcc
 
-# Options de compilation
-CFLAGS = -Wall -Wextra -g
+# Options de compilation (+ includes)
+CFLAGS = -Wall -Wextra -g -I. -ILexer -IParser -IParser/Parse_ATS -IParser/grammaire_recognizers
 
 # Commande pour supprimer des fichiers
 RM = rm -f
 
 # Fichiers sources
-SRC = Main.c Lexer/lexer.c Parser/parser.c Parser/instruction.c Parser/expression.c Parser/control_structures.c   utils.c
+SRC = Main.c \
+	Lexer/lexer.c \
+	Parser/parser.c \
+	Parser/grammaire_recognizers/control_structures.c \
+	Parser/grammaire_recognizers/expression.c \
+	Parser/grammaire_recognizers/instruction.c \
+	Parser/Parse_ATS/parse_control_structures.c \
+	Parser/Parse_ATS/parse_instruction.c \
+	Parser/Parse_ATS/parse_expression.c \
+	utils.c	
 
-# Fichiers objets (automatiquement générés depuis les sources)
+# Fichiers objets
 OBJ = $(SRC:.c=.o)
 
-# Règle par défaut (compile et exécute)
+# Règle par défaut
 all: $(EXEC)
 	@echo "Compilation terminée."
 	@./$(EXEC)
@@ -29,11 +38,10 @@ $(EXEC): $(OBJ)
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Nettoyer les fichiers compilés
+# Nettoyage
 clean:
 	$(RM) $(EXEC) $(OBJ)
 	@echo "Nettoyage terminé."
 
-# Nettoyer tout (exécutable + fichiers objets)
 mrproper: clean
 	@echo "Nettoyage complet terminé."

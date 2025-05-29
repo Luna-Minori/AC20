@@ -29,4 +29,76 @@ typedef struct
     int count;
 } TokenList;
 
+// Tous les types de nœud que tu vas rencontrer
+typedef enum
+{
+    NODE_BLOCK,
+    NODE_DECLARATION,
+    NODE_ASSIGNMENT,
+    NODE_IF,
+    NODE_FOR,
+    NODE_WHILE,
+    NODE_BINARY_EXPR, // + - * / % == != < <= > >= && ||
+    NODE_UNARY_EXPR,  // ++ -- - !
+    NODE_LITERAL,     // entier, flottant, char, string
+    NODE_IDENTIFIER,
+    NODE_POINTER // **
+    /* … ajoute tes autres types ici … */
+} NodeType;
+
+// Un ASTNode peut porter :
+//  • un opérateur binaire ou unaire
+//  • un littéral (avec valeur dans une union)
+//  • un identifiant (nom de variable…)
+//  • une instruction / déclaration (avec sous-arbres)
+typedef struct ASTNode
+{
+    NodeType type;
+    Token token; // optionnel : copie du token (utile pour littéraux ou identifiants)
+    int line;    // numéro de ligne pour les erreurs
+    int pointer_level;
+    // enfant et frère pour naviguer dans l’arbre
+    struct ASTNode *first_child;
+    struct ASTNode *next_sibling;
+
+    // payload spécifique selon type de nœud
+    union
+    {
+        struct
+        { // pour NARY (ex: programme ou bloc)
+          // aucun champ, on utilisera first_child / next_sibling
+        } nary;
+
+        struct
+        { // pour binaire
+            struct ASTNode *left;
+            struct ASTNode *right;
+        } binary;
+
+        struct
+        { // pour unaire
+            struct ASTNode *operande;
+        } unary;
+
+        struct
+        { // pour littéral
+            union
+            {
+                int int_val;
+                double float_val;
+                char char_val;
+                char *str_val;
+            };
+        } literal;
+
+        struct
+        { // pour identifiant
+            char *name;
+        } ident;
+
+        // tu peux ajouter d’autres payloads spécifiques…
+    } data;
+
+} ASTNode;
+
 #endif

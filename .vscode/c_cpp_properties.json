@@ -1,17 +1,24 @@
 {
   "configurations": [
     {
-      "name": "windows-gcc-x86",
+      "name": "Win32",
       "includePath": [
-        "${workspaceFolder}/**"
+        "${workspaceFolder}/**",
+        "${workspaceFolder}",
+        "${workspaceFolder}/lexer",
+        "${workspaceFolder}/Parser",
+        "${workspaceFolder}/Parser/Parse_ATS",
+        "${workspaceFolder}/Parser/grammaire_recognizers"
+      ],
+      "defines": [
+        "_DEBUG",
+        "UNICODE",
+        "_UNICODE"
       ],
       "compilerPath": "C:/MinGW/bin/gcc.exe",
-      "cStandard": "${default}",
-      "cppStandard": "${default}",
-      "intelliSenseMode": "windows-gcc-x86",
-      "compilerArgs": [
-        ""
-      ]
+      "cStandard": "c11",
+      "cppStandard": "c++17",
+      "intelliSenseMode": "gcc-x86"
     }
   ],
   "version": 4

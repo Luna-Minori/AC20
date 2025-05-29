@@ -87,7 +87,6 @@ int find_duo_operator(char first, char second)
     word[2] = '\0';
     const char *duo_operators[] = {
         "++", "--", "==", "!=", "<=", ">=", "&&", "||",
-        "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=",
         "<<", ">>", "->", NULL};
 
     for (int i = 0; i < taille_liste(duo_operators); i++)
@@ -98,6 +97,25 @@ int find_duo_operator(char first, char second)
         }
     }
 
+    return -1; // Si aucun mot-clé n'est trouvé
+}
+
+int find_duo_assigment(char first, char second)
+{
+    char word[3];
+    word[0] = first;
+    word[1] = second;
+    word[2] = '\0';
+    const char *duo_operators[] = {
+        "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=", NULL};
+
+    for (int i = 0; i < taille_liste(duo_operators); i++)
+    {
+        if (strcmp(word, duo_operators[i]) == 0)
+        {
+            return i;
+        }
+    }
     return -1; // Si aucun mot-clé n'est trouvé
 }
 
@@ -146,4 +164,180 @@ int is_wordcondition(char *word)
         }
     }
     return -1; // Le mot n'est pas une condition
+}
+
+int is_comparaison_op(char *word)
+{
+    const char *comparaison_ops[] = {
+        "==", "!=", "<", "<=", ">", ">=", NULL};
+    for (int i = 0; i < taille_liste(comparaison_ops); i++)
+    {
+        if (strcmp(word, comparaison_ops[i]) == 0)
+        {
+            return 1; // C'est un opérateur de comparaison
+        }
+    }
+    return 0; // Ce n'est pas un opérateur de comparaison
+}
+
+ASTNode *new_ATS(NodeType type, ASTNode *l, ASTNode *r, Token tok, int line)
+{
+    ASTNode *n = malloc(sizeof *n);
+    n->type = type;
+    n->token = tok;
+    n->line = line;
+    n->pointer_level = 0;
+    n->first_child = n->next_sibling = NULL;
+    n->data.binary.left = l;
+    n->data.binary.right = r;
+    return n;
+}
+
+void add_child(ASTNode *parent, ASTNode *child)
+{
+    if (!parent->first_child)
+    {
+        parent->first_child = child;
+    }
+    else
+    {
+        ASTNode *s = parent->first_child;
+        while (s->next_sibling)
+            s = s->next_sibling;
+        s->next_sibling = child;
+    }
+}
+
+const char *nodetype_to_string(NodeType type)
+{
+    switch (type)
+    {
+    case NODE_BLOCK:
+        return "Block";
+    case NODE_DECLARATION:
+        return "Declaration";
+    case NODE_ASSIGNMENT:
+        return "Assignment";
+    case NODE_IF:
+        return "If";
+    case NODE_FOR:
+        return "For";
+    case NODE_WHILE:
+        return "While";
+    case NODE_BINARY_EXPR:
+        return "Binary Expression";
+    case NODE_UNARY_EXPR:
+        return "Unary Expression";
+    case NODE_LITERAL:
+        return "Literal";
+    case NODE_IDENTIFIER:
+        return "Identifier";
+    // Ajoute ici les autres types si tu en as
+    default:
+        return "Unknown NodeType";
+    }
+}
+
+void print_ast(ASTNode *node, int indent)
+{
+    if (!node)
+        return;
+    // indentation
+    for (int i = 0; i < indent; i++)
+        printf("  ");
+
+    switch (node->type)
+    {
+    case NODE_BLOCK:
+        printf("Block\n");
+        break;
+    case NODE_DECLARATION:
+        printf("Declaration\n");
+        break;
+    case NODE_ASSIGNMENT:
+        printf("Assignment: %s\n", node->token.valeur);
+        break;
+    case NODE_IF:
+        printf("If\n");
+        break;
+    case NODE_FOR:
+        printf("For\n");
+        break;
+    case NODE_WHILE:
+        printf("While\n");
+        break;
+    case NODE_BINARY_EXPR:
+        printf("BinaryExpr: %s\n", node->token.valeur);
+        break;
+    case NODE_UNARY_EXPR:
+        printf("UnaryExpr: %s\n", node->token.valeur);
+        break;
+    case NODE_LITERAL:
+        // afficher selon type de literal (supposons token contient la string)
+        printf("Literal: %s\n", node->token.valeur);
+        break;
+    case NODE_IDENTIFIER:
+        printf("Identifier: %s\n", node->token.valeur);
+        break;
+    default:
+        printf("Unknown node\n");
+    }
+
+    // Afficher enfants selon type
+    switch (node->type)
+    {
+    case NODE_BINARY_EXPR:
+        print_ast(node->data.binary.left, indent + 1);
+        print_ast(node->data.binary.right, indent + 1);
+        break;
+    case NODE_UNARY_EXPR:
+        print_ast(node->data.unary.operande, indent + 1);
+        break;
+    default:
+        // pour tous les n-aires (bloc, déclarations, instructions…), on utilise first_child/next_sibling
+        for (ASTNode *child = node->first_child; child; child = child->next_sibling)
+        {
+            print_ast(child, indent + 1);
+        }
+        break;
+    }
+}
+
+void free_AST(ASTNode *node)
+{
+    if (!node)
+        return;
+
+    // Libération récursive des enfants
+    ASTNode *child = node->first_child;
+    while (child)
+    {
+        ASTNode *next = child->next_sibling;
+        free_AST(child);
+        child = next;
+    }
+
+    // Libération du contenu spécifique selon le type
+    switch (node->type)
+    {
+    case NODE_LITERAL:
+        if (node->token.type == TOKEN_STRING && node->token.valeur)
+        {
+            free(node->token.valeur); // libérer la chaîne copiée
+        }
+        break;
+
+    case NODE_IDENTIFIER:
+        if (node->data.ident.name)
+        {
+            free(node->data.ident.name);
+        }
+        break;
+
+    default:
+        break; // les autres types ne nécessitent pas de libération spéciale
+    }
+
+    // Libération du nœud lui-même
+    free(node);
 }

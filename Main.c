@@ -44,6 +44,7 @@ char *Read_file(const char *nom_fichier)
 int main()
 {
     char *buffer = Read_file("test2.txt");
+
     if (buffer)
     {
         TokenList *list = malloc(sizeof(TokenList));

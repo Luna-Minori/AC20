@@ -4,33 +4,39 @@
 #include "parser.h"
 #include "instruction.h"
 
-typedef struct tree
+void parser(TokenList *tokens)
 {
-    struct tree **tree;
-    TokenType type;
-    int child_count;
-} ParserTree;
-
-void parser(TokenList *list)
-{
-    if (list == NULL || list->count == 0)
+    if (!tokens || tokens->count == 0)
         return;
 
-    int index = 0;
-    while (index < list->count)
-    {
-        // Exemple : on tente d’analyser une instruction complète (comme une affectation ou appel de fonction)
-        int start_index = index;
+    // On crée un nœud racine de type BLOCK pour tout le programme
+    ASTNode *root = new_ATS(NODE_BLOCK, NULL, NULL,
+                            tokens->tokens[0], tokens->tokens[0].ligne);
 
-        if (is_instruction(list, &index))
+    int index = 0;
+    while (index < tokens->count)
+    {
+        int start = index;
+
+        // On essaie de parser une instruction complète (avec point-virgule si nécessaire)
+        ASTNode *inst = parse_instruction(tokens, &index);
+        if (!inst)
         {
-            printf("Instruction reconnue de %d à %d\n", start_index, index - 1);
-            // Ici tu pourrais appeler une fonction pour construire l’AST ou exécuter l’instruction
-        }
-        else
-        {
-            printf("Erreur de parsing a l'index :  %d (token: %s)\n", index, list->tokens[index].valeur);
+            fprintf(stderr, "Erreur de parsing a l'index %d (token: %s)\n",
+                    index, tokens->tokens[index].valeur);
             break;
         }
+
+        // Si l’index n’a pas bougé, on risque une boucle infinie
+        if (index == start)
+        {
+            fprintf(stderr, "Aucun token consomme a l'index %d\n", index);
+            break;
+        }
+
+        add_child(root, inst);
     }
+
+    print_ast(root, 0);
+    // TODO : free_ast(root);
 }
