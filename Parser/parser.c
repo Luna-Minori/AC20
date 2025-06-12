@@ -4,14 +4,25 @@
 #include "parser.h"
 #include "instruction.h"
 
-void parser(TokenList *tokens)
+void parser(TokenList *tokens, ASTNode *root, Analyse_Table *table, int *current_block_index)
 {
     if (!tokens || tokens->count == 0)
+    {
+        fprintf(stderr, "Erreur : liste de tokens vide\n");
         return;
+    }
 
-    // On crée un nœud racine de type BLOCK pour tout le programme
-    ASTNode *root = new_ATS(NODE_BLOCK, NULL, NULL,
-                            tokens->tokens[0], tokens->tokens[0].ligne);
+    if (!root)
+    {
+        fprintf(stderr, "Erreur : AST root NULL\n");
+        return;
+    }
+
+    if (!table)
+    {
+        fprintf(stderr, "Erreur : table des symboles NULL\n");
+        return;
+    }
 
     int index = 0;
     while (index < tokens->count)
@@ -19,7 +30,8 @@ void parser(TokenList *tokens)
         int start = index;
 
         // On essaie de parser une instruction complète (avec point-virgule si nécessaire)
-        ASTNode *inst = parse_instruction(tokens, &index);
+        printf("parser\n");
+        ASTNode *inst = parse_instruction(tokens, &index, table, current_block_index);
         if (!inst)
         {
             fprintf(stderr, "Erreur de parsing a l'index %d (token: %s)\n",
@@ -33,10 +45,11 @@ void parser(TokenList *tokens)
             fprintf(stderr, "Aucun token consomme a l'index %d\n", index);
             break;
         }
-
+        printf("la");
         add_child(root, inst);
     }
 
     print_ast(root, 0);
-    // TODO : free_ast(root);
+    print_symbol_table(table);
+    //  TODO : free_ast(root);
 }

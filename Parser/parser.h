@@ -7,6 +7,6 @@
 #include "control_structures.h"
 #include "parse_instruction.h"
 
-void parser(TokenList *list);
+void parser(TokenList *tokens, ASTNode *root, Analyse_Table *table, int *current_block_index);
 
 #endif

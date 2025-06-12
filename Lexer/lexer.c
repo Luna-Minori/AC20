@@ -78,11 +78,11 @@ void lexer(char *file, TokenList *list)
     {
         while (buffer[index_buffer] == ' ' || buffer[index_buffer] == '\n' || buffer[index_buffer] == '\t')
         {
-            index_buffer++;
             if (buffer[index_buffer] == '\n')
             {
                 numero_ligne++; // on saute le */
             }
+            index_buffer++;
         }
 
         while (buffer[index_buffer] == '/' && buffer[index_buffer + 1] == '/') // Gestion des commentaires

@@ -22,10 +22,6 @@ static int peek_operator(TokenList *t, int index, const char *op)
 ASTNode *parse_expression(TokenList *tokens, int *index)
 {
     int start = *index;
-    printf("[parse_expression] enter idx=%d token=%s\n",
-           start,
-           start < tokens->count ? tokens->tokens[start].valeur : "EOF");
-
     ASTNode *node = parse_logical_or(tokens, index);
 
     if (!node)
@@ -33,24 +29,12 @@ ASTNode *parse_expression(TokenList *tokens, int *index)
         *index = start;
         printf("[parse_expression] fail, reset idx=%d\n", start);
     }
-    else
-    {
-        printf("[parse_expression] exit node=%s new_idx=%d\n",
-               node->type == NODE_BINARY_EXPR ? "BinaryExpr" : node->type == NODE_LITERAL  ? "Literal"
-                                                           : node->type == NODE_IDENTIFIER ? "Identifier"
-                                                                                           :
-                                                                                           /*…*/ "Other",
-               *index);
-    }
     return node;
 }
 
 ASTNode *parse_addition(TokenList *tokens, int *index)
 {
     int start = *index;
-    printf("  [parse_addition] enter idx=%d token=%s\n",
-           start,
-           start < tokens->count ? tokens->tokens[start].valeur : "EOF");
 
     ASTNode *left = parse_multiplication(tokens, index);
     if (!left)
@@ -63,7 +47,6 @@ ASTNode *parse_addition(TokenList *tokens, int *index)
     while (*index < tokens->count && is_add_op(tokens->tokens[*index]))
     {
         Token op = tokens->tokens[(*index)++];
-        printf("  [parse_addition] found op '%s' at idx=%d\n", op.valeur, *index - 1);
 
         ASTNode *right = parse_multiplication(tokens, index);
         if (!right)
@@ -75,12 +58,7 @@ ASTNode *parse_addition(TokenList *tokens, int *index)
         }
 
         left = new_ATS(NODE_BINARY_EXPR, left, right, op, op.ligne);
-        printf("  [parse_addition] build BinaryExpr, now idx=%d\n", *index);
     }
-
-    printf("  [parse_addition] exit, returning %s idx=%d\n",
-           left->type == NODE_BINARY_EXPR ? "BinaryExpr" : "Identifier/Literal",
-           *index);
     return left;
 }
 

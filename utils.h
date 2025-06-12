@@ -23,4 +23,6 @@ void print_ast(ASTNode *n, int depth);
 void add_child(ASTNode *parent, ASTNode *child);
 ASTNode *new_ATS(NodeType type, ASTNode *l, ASTNode *r, Token tok, int line);
 void free_AST(ASTNode *node);
+void add_AT(Analyse_Table *table, TokenType type, Token token, const char *name, int index_block);
+void print_symbol_table(Analyse_Table *table);
 #endif // UTILS_H

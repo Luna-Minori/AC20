@@ -3,7 +3,9 @@ nombre = nombre + nombre2;
 nombre +2;
 nombre += 1;
 nombre < 3;
+
 if((((nombre == 5) && (oui < 2 || 5 < 8)))){
+    int miam =0;
     miam++;
 
     if(nombre < 18){

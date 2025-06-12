@@ -3,6 +3,7 @@
 #include <string.h>
 #include "Lexer/lexer.h"
 #include "Parser/parser.h"
+#include "Analyser_Semantic/analyser_semantic.h"
 
 char *Read_file(const char *nom_fichier)
 {
@@ -47,6 +48,7 @@ int main()
 
     if (buffer)
     {
+        // LEXER
         TokenList *list = malloc(sizeof(TokenList));
         list->tokens = NULL;
         list->count = 0;
@@ -56,7 +58,21 @@ int main()
             printf("TOKEN[%d] type=%d ligne=%d valeur=%s\n", i, list->tokens[i].type, list->tokens[i].ligne, list->tokens[i].valeur);
         }
 
-        parser(list);
+        // PARSER
+        ASTNode *root = new_ATS(NODE_BLOCK, NULL, NULL, list->tokens[0], list->tokens[0].ligne);
+        Analyse_Table *table = malloc(sizeof(Analyse_Table));
+        if (!table)
+        {
+            perror("malloc table");
+            exit(EXIT_FAILURE);
+        }
+        table->count = 0;
+        table->tete = NULL;
+        int current_block_index = 0;
+        parser(list, root, table, &current_block_index);
+
+        // ANALYSER
+        Analyser_semantic(root, table);
         free_token_list(list);
         free(buffer);
     }

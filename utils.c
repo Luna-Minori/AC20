@@ -341,3 +341,55 @@ void free_AST(ASTNode *node)
     // Libération du nœud lui-même
     free(node);
 }
+
+void add_AT(Analyse_Table *table, TokenType type, Token token, const char *name, int index_block)
+{
+    // Allocation du nouvel élément
+    SymbolEntry *nouveau = malloc(sizeof(SymbolEntry));
+    if (!nouveau)
+    {
+        // Échec allocation mémoire
+        return;
+    }
+
+    // Initialisation des champs
+    nouveau->type = type;
+    nouveau->token = token;
+
+    // Copie sécurisée du nom
+    nouveau->name = strdup(name);
+    if (!nouveau->name)
+    {
+        free(nouveau);
+        return;
+    }
+
+    nouveau->index_block = index_block;
+
+    // Insertion en tête de la liste
+    nouveau->suivant = table->tete;
+    table->tete = nouveau;
+
+    // Mise à jour du compteur
+    table->count++;
+}
+
+void print_symbol_table(Analyse_Table *table)
+{
+    printf("\n===== Table des symboles =====\n");
+    SymbolEntry *entry = table->tete;
+    int count = 0;
+    while (entry != NULL)
+    {
+        printf("Symbole %d :\n", ++count);
+        printf("  Nom          : %s\n", entry->name);
+        printf("  Bloc index   : %d\n", entry->index_block);
+        printf("  Ligne source : %d\n", entry->token.ligne);
+        printf("-----------------------------\n");
+        entry = entry->suivant;
+    }
+    if (count == 0)
+    {
+        printf("  (aucun symbole)\n");
+    }
+}

@@ -12,8 +12,6 @@ typedef enum
     TOKEN_CHAR,
     TOKEN_PREPROCESSOR,
     TOKEN_PUNCTUATION,
-    TOKEN_COMMENT,
-    TOKEN_END
 } TokenType;
 
 typedef struct
@@ -100,5 +98,20 @@ typedef struct ASTNode
     } data;
 
 } ASTNode;
+
+typedef struct T
+{
+    TokenType type;
+    Token token;
+    char *name;
+    int index_block;
+    struct T *suivant;
+} SymbolEntry;
+
+typedef struct
+{
+    SymbolEntry *tete;
+    int count;
+} Analyse_Table;
 
 #endif
