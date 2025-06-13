@@ -23,13 +23,11 @@ int is_if(TokenList *tokens, int *index)
     (*index)++;
 
     int tmp = *index;
-    printf("token : %s\n", tokens->tokens[tmp].valeur);
     if (!is_expression(tokens, &tmp))
     {
         *index = start;
         return 0;
     }
-    printf("token : %s\n", tokens->tokens[tmp].valeur);
     // succès → on avance l’index réel
     *index = tmp;
 
@@ -81,14 +79,12 @@ int is_if(TokenList *tokens, int *index)
 int is_for(TokenList *tokens, int *index)
 {
     int start = *index;
-    printf("token : %s\n", tokens->tokens[*index].valeur);
     // 1) Mot-clé « for »
     if (*index >= tokens->count || tokens->tokens[*index].type != TOKEN_KEYWORD || strcmp(tokens->tokens[*index].valeur, "for") != 0)
     {
         return 0;
     }
     (*index)++;
-    printf("token : %s\n", tokens->tokens[*index].valeur);
     // 2) Parenthèse ouvrante
     if (*index >= tokens->count || !is_openingParenthesis(tokens->tokens[*index]))
     {
@@ -96,7 +92,6 @@ int is_for(TokenList *tokens, int *index)
         return 0;
     }
     (*index)++;
-    printf("token : %s\n", tokens->tokens[*index].valeur);
     // 3) Segment d'init : declaration | assignment | expression | vide
     {
         int tmp = *index;
@@ -114,9 +109,7 @@ int is_for(TokenList *tokens, int *index)
         *index = start;
         return 0;
     }
-    printf("token : %s\n", tokens->tokens[*index].valeur);
     (*index)++;
-    printf("token : %s\n", tokens->tokens[*index].valeur);
     // 5) Segment de condition : expression | vide
     {
         int tmp = *index;
@@ -133,9 +126,7 @@ int is_for(TokenList *tokens, int *index)
         *index = start;
         return 0;
     }
-    printf("token : %s\n", tokens->tokens[*index].valeur);
     (*index)++;
-    printf("token : %s\n", tokens->tokens[*index].valeur);
     // 7) Segment post : assignment | expression | vide
     {
         int tmp = *index;
@@ -145,7 +136,6 @@ int is_for(TokenList *tokens, int *index)
         }
         // sinon, post vide → *index reste inchangé
     }
-    printf("token : %s\n", tokens->tokens[*index].valeur);
     // 8) Parenthèse fermante
     if (*index >= tokens->count || !is_closingParenthesis(tokens->tokens[*index]))
     {
@@ -153,15 +143,12 @@ int is_for(TokenList *tokens, int *index)
         return 0;
     }
     (*index)++;
-    printf("token avant bloc : %s\n", tokens->tokens[*index].valeur);
     // 9) Bloc
     if (!is_block(tokens, index))
     {
         *index = start;
         return 0;
     }
-    printf("token : %s\n", tokens->tokens[*index].valeur);
-    printf("sorite");
     return 1;
 }
 

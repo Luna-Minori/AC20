@@ -35,6 +35,7 @@ typedef enum
     NODE_ASSIGNMENT,
     NODE_IF,
     NODE_FOR,
+    NODE_KEYWORD,
     NODE_WHILE,
     NODE_BINARY_EXPR, // + - * / % == != < <= > >= && ||
     NODE_UNARY_EXPR,  // ++ -- - !
@@ -44,11 +45,6 @@ typedef enum
     /* … ajoute tes autres types ici … */
 } NodeType;
 
-// Un ASTNode peut porter :
-//  • un opérateur binaire ou unaire
-//  • un littéral (avec valeur dans une union)
-//  • un identifiant (nom de variable…)
-//  • une instruction / déclaration (avec sous-arbres)
 typedef struct ASTNode
 {
     NodeType type;
@@ -99,9 +95,15 @@ typedef struct ASTNode
 
 } ASTNode;
 
+typedef struct Pile
+{
+    int index;           // ID unique du bloc (utile pour debug ou table de symboles)
+    struct Pile *parent; // Pointeur vers le bloc parent
+} Pile;
+
 typedef struct T
 {
-    TokenType type;
+    char *type;
     Token token;
     char *name;
     int index_block;

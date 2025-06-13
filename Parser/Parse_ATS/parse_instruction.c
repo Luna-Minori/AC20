@@ -12,7 +12,6 @@ ASTNode *parse_declaration(TokenList *tokens, int *index, Analyse_Table *table, 
         *index = start;
         return NULL;
     }
-    printf("Déclaration reconnue à l'index %d\n", start);
 
     ASTNode *decl = new_ATS(NODE_DECLARATION, NULL, NULL,
                             tokens->tokens[start],
@@ -21,22 +20,19 @@ ASTNode *parse_declaration(TokenList *tokens, int *index, Analyse_Table *table, 
     int i = start;
 
     // Table symbole
-    printf("déclaration ID\n");
     SymbolEntry *ID = malloc(sizeof(SymbolEntry));
     if (!ID)
     {
         perror("malloc SymbolEntry");
         exit(EXIT_FAILURE);
     }
-    printf("current_block_index : %d\n", *current_block_index);
-    ID->index_block = *current_block_index;
-    printf("pas crash 2\n");
-    ID->token = tokens->tokens[i]; // type token (int, float...)
-    printf("pas crash 3\n");
-    ID->type = tokens->tokens[i++].type;
 
+    ID->index_block = *current_block_index;
+    ID->token = tokens->tokens[i];       // token
+    ID->type = tokens->tokens[i].valeur; // type (int, float etc)
+    ID->name = tokens->tokens[i++].valeur;
     // type AST
-    ASTNode *typeNode = new_ATS(NODE_IDENTIFIER, NULL, NULL,
+    ASTNode *typeNode = new_ATS(NODE_KEYWORD, NULL, NULL,
                                 ID->token, ID->token.ligne);
     add_child(decl, typeNode);
 
@@ -61,13 +57,9 @@ ASTNode *parse_declaration(TokenList *tokens, int *index, Analyse_Table *table, 
 
     // Identifiant
     Token idTok = tokens->tokens[i++];
-    printf("pas crash 4\n");
     ID->name = strdup(idTok.valeur);
-    printf("pas crash 5\n");
     ID->suivant = table->tete;
-    printf("pas crash 6\n");
     table->tete = ID;
-    printf("pas crash 7\n");
     table->count++;
 
     ASTNode *idNode = new_ATS(NODE_IDENTIFIER, NULL, NULL, idTok, idTok.ligne);
@@ -91,7 +83,6 @@ ASTNode *parse_declaration(TokenList *tokens, int *index, Analyse_Table *table, 
     }
 
     *index = i;
-    printf("Sortie parse_declaration à %d\n", start);
     print_ast(decl, 0);
     return decl;
 }
@@ -106,7 +97,6 @@ ASTNode *parse_assignment(TokenList *tokens, int *index)
         *index = start;
         return NULL;
     }
-    printf("Affectation reconnue a l'index %d\n", start);
     // Création du nœud racine d'affectation (=)
     Token opTok = tokens->tokens[start + 1]; // token '='
     ASTNode *assign = new_ATS(NODE_ASSIGNMENT, NULL, NULL, opTok, opTok.ligne);
@@ -119,8 +109,6 @@ ASTNode *parse_assignment(TokenList *tokens, int *index)
     // Enfant droit : expression (après '=')
     int exprIndex = start + 2;
     ASTNode *expressionNode = parse_expression(tokens, &exprIndex);
-    printf("expressionNode :\n");
-    print_ast(expressionNode, 0); // Debug : affiche l'AST de l'expression
     if (!expressionNode)
     {
         fprintf(stderr, "Erreur interne : impossible de parser l'expression d'affectation.\n");
@@ -141,13 +129,14 @@ ASTNode *parse_instruction(TokenList *tokens, int *index, Analyse_Table *table, 
     ASTNode *node = NULL;
 
     // 1) Déclaration ;
-    printf("ici\n");
+    print_ast(node, 0); // Debug : affiche l'AST de l'expression
     node = parse_declaration(tokens, index, table, current_block_index);
     if (node != NULL)
     {
         if (*index < tokens->count && is_token_pointvirgule(tokens, index))
         {
             (*index)++; // consomme ';'
+            print_ast(node, 0);
             return node;
         }
         free_AST(node);
@@ -163,6 +152,7 @@ ASTNode *parse_instruction(TokenList *tokens, int *index, Analyse_Table *table, 
         if (*index < tokens->count && is_token_pointvirgule(tokens, index))
         {
             (*index)++;
+            print_ast(node, 0);
             return node;
         }
         free_AST(node);
@@ -178,6 +168,7 @@ ASTNode *parse_instruction(TokenList *tokens, int *index, Analyse_Table *table, 
         if (*index < tokens->count && is_token_pointvirgule(tokens, index))
         {
             (*index)++;
+            print_ast(node, 0);
             return node;
         }
         free_AST(node);
@@ -190,6 +181,7 @@ ASTNode *parse_instruction(TokenList *tokens, int *index, Analyse_Table *table, 
     node = parse_if(tokens, index, table, current_block_index);
     if (node != NULL)
     {
+        print_ast(node, 0);
         return node;
     }
     *index = start;
@@ -197,6 +189,7 @@ ASTNode *parse_instruction(TokenList *tokens, int *index, Analyse_Table *table, 
     node = parse_for(tokens, index, table, current_block_index);
     if (node != NULL)
     {
+        print_ast(node, 0);
         return node;
     }
     *index = start;
@@ -204,6 +197,7 @@ ASTNode *parse_instruction(TokenList *tokens, int *index, Analyse_Table *table, 
     node = parse_while(tokens, index, table, current_block_index);
     if (node != NULL)
     {
+        print_ast(node, 0);
         return node;
     }
     *index = start;
@@ -212,6 +206,7 @@ ASTNode *parse_instruction(TokenList *tokens, int *index, Analyse_Table *table, 
     node = parse_block(tokens, index, table, current_block_index);
     if (node != NULL)
     {
+        print_ast(node, 0);
         return node;
     }
     *index = start;
@@ -232,7 +227,7 @@ ASTNode *parse_block(TokenList *tokens, int *index, Analyse_Table *table, int *c
         return NULL;
     }
     (*current_block_index)++; // met à jour l'index des blocs
-    printf("pas crash 8\n");
+
     // Création du noeud BLOCK avec le token '{' à start
     Token braceTok = tokens->tokens[start];
     ASTNode *blockNode = new_ATS(NODE_BLOCK, NULL, NULL, braceTok, braceTok.ligne);
@@ -255,6 +250,5 @@ ASTNode *parse_block(TokenList *tokens, int *index, Analyse_Table *table, int *c
     // *index est déjà avancé par is_block, donc on le laisse
 
     (*current_block_index)--; // met à jour l'index des blocs
-    printf("pas crash 9\n");
     return blockNode;
 }

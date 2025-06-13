@@ -48,6 +48,7 @@ int main()
 
     if (buffer)
     {
+        printf("hello");
         // LEXER
         TokenList *list = malloc(sizeof(TokenList));
         list->tokens = NULL;
@@ -72,9 +73,22 @@ int main()
         parser(list, root, table, &current_block_index);
 
         // ANALYSER
-        Analyser_semantic(root, table);
+        Analyse_Table *verif_table = malloc(sizeof(Analyse_Table));
+        if (!table)
+        {
+            perror("malloc table");
+            exit(EXIT_FAILURE);
+        }
+        verif_table->count = 0;
+        verif_table->tete = NULL;
+        int index = 0;
+        Pile *pile = create_block(NULL, &index);
+        analyser_semantique(root, table, pile, verif_table, &index);
+        print_symbol_table(verif_table);
+        printf("arbre valide \n");
         free_token_list(list);
         free(buffer);
     }
+
     return 0;
 }

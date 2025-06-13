@@ -27,7 +27,6 @@ ASTNode *parse_expression(TokenList *tokens, int *index)
     if (!node)
     {
         *index = start;
-        printf("[parse_expression] fail, reset idx=%d\n", start);
     }
     return node;
 }
@@ -40,7 +39,6 @@ ASTNode *parse_addition(TokenList *tokens, int *index)
     if (!left)
     {
         *index = start;
-        printf("  [parse_addition] no left → fail idx=%d\n", start);
         return NULL;
     }
 
@@ -53,7 +51,6 @@ ASTNode *parse_addition(TokenList *tokens, int *index)
         {
             *index = start;
             free_AST(left);
-            printf("  [parse_addition] right NULL → backtrack idx=%d\n", start);
             return NULL;
         }
 

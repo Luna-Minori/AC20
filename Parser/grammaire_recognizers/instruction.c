@@ -54,7 +54,6 @@ int is_declaration(TokenList *tokens, int *index)
             return 0;
         }
     }
-    printf("sortie declaration valide \n");
     return 1;
 }
 
@@ -133,21 +132,17 @@ int is_block(TokenList *tokens, int *index)
 {
     int start = *index;
     // 1) '{'
-    printf("token bloc : %s\n", tokens->tokens[*index].valeur);
     if (*index >= tokens->count || !is_openingBrace(tokens->tokens[*index]))
     {
         return 0;
     }
     (*index)++;
-    printf("token bloc : %s\n", tokens->tokens[*index].valeur);
 
     // 2) instructions à l’intérieur
     while (*index < tokens->count && !is_closingBrace(tokens->tokens[*index]))
     {
-        printf("token bloc : %s\n", tokens->tokens[*index].valeur);
         if (!is_instruction(tokens, index))
         {
-            printf("token bloc erreure : %s\n", tokens->tokens[*index].valeur);
             // si une instruction échoue, on considère que le bloc n'est pas valide
             *index = start;
             return 0;

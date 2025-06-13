@@ -3,6 +3,6 @@
 #include "type.h"
 #include "utils.h"
 
-int Analyser_semantic();
+int analyser_semantique(ASTNode *node, Analyse_Table *table, Pile *pile, Analyse_Table *verif_table, int *index);
 
 #endif

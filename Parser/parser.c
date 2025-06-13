@@ -30,7 +30,6 @@ void parser(TokenList *tokens, ASTNode *root, Analyse_Table *table, int *current
         int start = index;
 
         // On essaie de parser une instruction complète (avec point-virgule si nécessaire)
-        printf("parser\n");
         ASTNode *inst = parse_instruction(tokens, &index, table, current_block_index);
         if (!inst)
         {
@@ -45,7 +44,6 @@ void parser(TokenList *tokens, ASTNode *root, Analyse_Table *table, int *current
             fprintf(stderr, "Aucun token consomme a l'index %d\n", index);
             break;
         }
-        printf("la");
         add_child(root, inst);
     }
 

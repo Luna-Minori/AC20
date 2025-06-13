@@ -279,6 +279,9 @@ void print_ast(ASTNode *node, int indent)
     case NODE_IDENTIFIER:
         printf("Identifier: %s\n", node->token.valeur);
         break;
+    case NODE_KEYWORD:
+        printf("Keyword: %s\n", node->token.valeur);
+        break;
     default:
         printf("Unknown node\n");
     }
@@ -342,38 +345,6 @@ void free_AST(ASTNode *node)
     free(node);
 }
 
-void add_AT(Analyse_Table *table, TokenType type, Token token, const char *name, int index_block)
-{
-    // Allocation du nouvel élément
-    SymbolEntry *nouveau = malloc(sizeof(SymbolEntry));
-    if (!nouveau)
-    {
-        // Échec allocation mémoire
-        return;
-    }
-
-    // Initialisation des champs
-    nouveau->type = type;
-    nouveau->token = token;
-
-    // Copie sécurisée du nom
-    nouveau->name = strdup(name);
-    if (!nouveau->name)
-    {
-        free(nouveau);
-        return;
-    }
-
-    nouveau->index_block = index_block;
-
-    // Insertion en tête de la liste
-    nouveau->suivant = table->tete;
-    table->tete = nouveau;
-
-    // Mise à jour du compteur
-    table->count++;
-}
-
 void print_symbol_table(Analyse_Table *table)
 {
     printf("\n===== Table des symboles =====\n");
@@ -383,6 +354,7 @@ void print_symbol_table(Analyse_Table *table)
     {
         printf("Symbole %d :\n", ++count);
         printf("  Nom          : %s\n", entry->name);
+        printf("  Type         : %s\n", entry->type);
         printf("  Bloc index   : %d\n", entry->index_block);
         printf("  Ligne source : %d\n", entry->token.ligne);
         printf("-----------------------------\n");
@@ -392,4 +364,30 @@ void print_symbol_table(Analyse_Table *table)
     {
         printf("  (aucun symbole)\n");
     }
+}
+
+Pile *create_block(Pile *parent, int *index)
+{
+    Pile *b = malloc(sizeof(Pile));
+    if (!b)
+    {
+        perror("malloc");
+        exit(1);
+    }
+    printf("creation nouveau block pile \n");
+    b->index = (*index++); // chaque appel reçoit un nouvel ID
+    printf("debug index\n");
+    b->parent = parent;
+    return b;
+}
+
+int is_block_visible(Pile *current, int block_index)
+{
+    while (current)
+    {
+        if (current->index == block_index)
+            return 1;
+        current = current->parent;
+    }
+    return 0;
 }
