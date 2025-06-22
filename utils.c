@@ -355,7 +355,6 @@ void print_symbol_table(Analyse_Table *table)
         printf("Symbole %d :\n", ++count);
         printf("  Nom          : %s\n", entry->name);
         printf("  Type         : %s\n", entry->type);
-        printf("  Bloc index   : %d\n", entry->index_block);
         printf("  Ligne source : %d\n", entry->token.ligne);
         printf("-----------------------------\n");
         entry = entry->suivant;

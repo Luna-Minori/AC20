@@ -61,6 +61,10 @@ int main()
 
         // PARSER
         ASTNode *root = new_ATS(NODE_BLOCK, NULL, NULL, list->tokens[0], list->tokens[0].ligne);
+
+        int current_block_index = 0;
+        parser(list, root, &current_block_index);
+        // ANALYSER
         Analyse_Table *table = malloc(sizeof(Analyse_Table));
         if (!table)
         {
@@ -69,23 +73,10 @@ int main()
         }
         table->count = 0;
         table->tete = NULL;
-        int current_block_index = 0;
-        parser(list, root, table, &current_block_index);
-
-        // ANALYSER
-        Analyse_Table *verif_table = malloc(sizeof(Analyse_Table));
-        if (!table)
-        {
-            perror("malloc table");
-            exit(EXIT_FAILURE);
-        }
-        verif_table->count = 0;
-        verif_table->tete = NULL;
         int index = 0;
-        Pile *pile = create_block(NULL, &index);
-        analyser_semantique(root, table, pile, verif_table, &index);
-        print_symbol_table(verif_table);
-        printf("arbre valide \n");
+        analyser_semantique(root, table);
+        print_symbol_table(table);
+        printf("code sources valide\n");
         free_token_list(list);
         free(buffer);
     }

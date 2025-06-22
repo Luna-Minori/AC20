@@ -3,7 +3,7 @@
 #include <string.h>
 #include "parse_instruction.h"
 
-ASTNode *parse_declaration(TokenList *tokens, int *index, Analyse_Table *table, int *current_block_index)
+ASTNode *parse_declaration(TokenList *tokens, int *index, int *current_block_index)
 {
     int start = *index;
 
@@ -19,22 +19,11 @@ ASTNode *parse_declaration(TokenList *tokens, int *index, Analyse_Table *table, 
 
     int i = start;
 
-    // Table symbole
-    SymbolEntry *ID = malloc(sizeof(SymbolEntry));
-    if (!ID)
-    {
-        perror("malloc SymbolEntry");
-        exit(EXIT_FAILURE);
-    }
-
-    ID->index_block = *current_block_index;
-    ID->token = tokens->tokens[i];       // token
-    ID->type = tokens->tokens[i].valeur; // type (int, float etc)
-    ID->name = tokens->tokens[i++].valeur;
     // type AST
     ASTNode *typeNode = new_ATS(NODE_KEYWORD, NULL, NULL,
-                                ID->token, ID->token.ligne);
+                                tokens->tokens[i], tokens->tokens[i].ligne);
     add_child(decl, typeNode);
+    i++;
 
     // Gestion des pointeurs
     int pointer_count = 0;
@@ -57,10 +46,6 @@ ASTNode *parse_declaration(TokenList *tokens, int *index, Analyse_Table *table, 
 
     // Identifiant
     Token idTok = tokens->tokens[i++];
-    ID->name = strdup(idTok.valeur);
-    ID->suivant = table->tete;
-    table->tete = ID;
-    table->count++;
 
     ASTNode *idNode = new_ATS(NODE_IDENTIFIER, NULL, NULL, idTok, idTok.ligne);
     add_child(decl, idNode);
@@ -123,14 +108,14 @@ ASTNode *parse_assignment(TokenList *tokens, int *index)
     return assign;
 }
 
-ASTNode *parse_instruction(TokenList *tokens, int *index, Analyse_Table *table, int *current_block_index)
+ASTNode *parse_instruction(TokenList *tokens, int *index, int *current_block_index)
 {
     int start = *index;
     ASTNode *node = NULL;
 
     // 1) Déclaration ;
     print_ast(node, 0); // Debug : affiche l'AST de l'expression
-    node = parse_declaration(tokens, index, table, current_block_index);
+    node = parse_declaration(tokens, index, current_block_index);
     if (node != NULL)
     {
         if (*index < tokens->count && is_token_pointvirgule(tokens, index))
@@ -178,7 +163,7 @@ ASTNode *parse_instruction(TokenList *tokens, int *index, Analyse_Table *table, 
     *index = start;
 
     // 4) if / for / while (pas de ;)
-    node = parse_if(tokens, index, table, current_block_index);
+    node = parse_if(tokens, index, current_block_index);
     if (node != NULL)
     {
         print_ast(node, 0);
@@ -186,7 +171,7 @@ ASTNode *parse_instruction(TokenList *tokens, int *index, Analyse_Table *table, 
     }
     *index = start;
 
-    node = parse_for(tokens, index, table, current_block_index);
+    node = parse_for(tokens, index, current_block_index);
     if (node != NULL)
     {
         print_ast(node, 0);
@@ -194,7 +179,7 @@ ASTNode *parse_instruction(TokenList *tokens, int *index, Analyse_Table *table, 
     }
     *index = start;
 
-    node = parse_while(tokens, index, table, current_block_index);
+    node = parse_while(tokens, index, current_block_index);
     if (node != NULL)
     {
         print_ast(node, 0);
@@ -203,7 +188,7 @@ ASTNode *parse_instruction(TokenList *tokens, int *index, Analyse_Table *table, 
     *index = start;
 
     // 5) bloc seul (cas très rare : traitement direct d'un {...} comme instruction)
-    node = parse_block(tokens, index, table, current_block_index);
+    node = parse_block(tokens, index, current_block_index);
     if (node != NULL)
     {
         print_ast(node, 0);
@@ -216,7 +201,7 @@ ASTNode *parse_instruction(TokenList *tokens, int *index, Analyse_Table *table, 
 }
 
 // parse_block : construit un AST pour { instr* }
-ASTNode *parse_block(TokenList *tokens, int *index, Analyse_Table *table, int *current_block_index)
+ASTNode *parse_block(TokenList *tokens, int *index, int *current_block_index)
 {
     int start = *index;
 
@@ -236,7 +221,7 @@ ASTNode *parse_block(TokenList *tokens, int *index, Analyse_Table *table, int *c
     int pos = start + 1;     // après '{'
     while (pos < *index - 1) // *index pointe après '}', donc -1 est le '}'
     {
-        ASTNode *inst = parse_instruction(tokens, &pos, table, current_block_index);
+        ASTNode *inst = parse_instruction(tokens, &pos, current_block_index);
         if (!inst)
         {
             fprintf(stderr, "Erreur : instruction invalide dans bloc à la ligne %d\n", tokens->tokens[pos].ligne);

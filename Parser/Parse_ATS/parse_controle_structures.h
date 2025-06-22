@@ -8,8 +8,8 @@
 #include "parse_instruction.h"
 #include "utils.h"
 
-ASTNode *parse_if(TokenList *tokens, int *index, Analyse_Table *table, int *current_block_index);
-ASTNode *parse_for(TokenList *tokens, int *index, Analyse_Table *table, int *current_block_index);
-ASTNode *parse_while(TokenList *tokens, int *index, Analyse_Table *table, int *current_block_index);
+ASTNode *parse_if(TokenList *tokens, int *index, int *current_block_index);
+ASTNode *parse_for(TokenList *tokens, int *index, int *current_block_index);
+ASTNode *parse_while(TokenList *tokens, int *index, int *current_block_index);
 
 #endif

@@ -20,7 +20,7 @@ OBJ = $(SRC:.c=.o)
 all: $(EXEC)
 	@echo "Compilation terminée."
 	@./$(EXEC)
-	
+
 run: $(EXEC)
 	@./$(EXEC)
 

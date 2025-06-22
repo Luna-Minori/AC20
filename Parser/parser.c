@@ -4,7 +4,7 @@
 #include "parser.h"
 #include "instruction.h"
 
-void parser(TokenList *tokens, ASTNode *root, Analyse_Table *table, int *current_block_index)
+void parser(TokenList *tokens, ASTNode *root, int *current_block_index)
 {
     if (!tokens || tokens->count == 0)
     {
@@ -18,19 +18,13 @@ void parser(TokenList *tokens, ASTNode *root, Analyse_Table *table, int *current
         return;
     }
 
-    if (!table)
-    {
-        fprintf(stderr, "Erreur : table des symboles NULL\n");
-        return;
-    }
-
     int index = 0;
     while (index < tokens->count)
     {
         int start = index;
 
         // On essaie de parser une instruction complète (avec point-virgule si nécessaire)
-        ASTNode *inst = parse_instruction(tokens, &index, table, current_block_index);
+        ASTNode *inst = parse_instruction(tokens, &index, current_block_index);
         if (!inst)
         {
             fprintf(stderr, "Erreur de parsing a l'index %d (token: %s)\n",
@@ -48,6 +42,5 @@ void parser(TokenList *tokens, ASTNode *root, Analyse_Table *table, int *current
     }
 
     print_ast(root, 0);
-    print_symbol_table(table);
     //  TODO : free_ast(root);
 }

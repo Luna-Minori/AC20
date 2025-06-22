@@ -9,9 +9,9 @@
 #include "parse_expression.h"
 #include "parse_controle_structures.h"
 
-ASTNode *parse_instruction(TokenList *tokens, int *index, Analyse_Table *table, int *current_block_index);
-ASTNode *parse_declaration(TokenList *tokens, int *index, Analyse_Table *table, int *current_block_index);
+ASTNode *parse_instruction(TokenList *tokens, int *index, int *current_block_index);
+ASTNode *parse_declaration(TokenList *tokens, int *index, int *current_block_index);
 ASTNode *parse_assignment(TokenList *tokens, int *index);
-ASTNode *parse_block(TokenList *tokens, int *index, Analyse_Table *table, int *current_block_index);
+ASTNode *parse_block(TokenList *tokens, int *index, int *current_block_index);
 
 #endif

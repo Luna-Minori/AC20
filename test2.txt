@@ -1,29 +1,35 @@
 int nombre = 5;
+int nombre2 = 10;
+int oui = 3;
 nombre = nombre + nombre2;
 nombre +2;
 nombre += 1;
 nombre < 3;
-
 if((((nombre == 5) && (oui < 2 || 5 < 8)))){
     int miam =0;
+    miam = miam +2;
     miam++;
 
     if(nombre < 18){
         miam ++;
     }
 }
-else if( nombre <=2) {
-    maim--;
-}
+
 else {
+    int miam = 5;
     miam + 2;
+    if(nombre < 18){
+        miam ++;
+    }
 }
 
 for(int i=0; i < 18 ; i++){
     if(1 ==1){
+        int miam = 1;
         miam--;
     }
 }
+int miam = 5;
 while(nombre ==5){
     miam++;
     if(nombre > 5){

@@ -28,10 +28,10 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "${workspaceFolder}",
-      "program": "C:\\Users\\Luna\\Documents\\GitHub\\AC20\\Main.exe",
+      "cwd": "c:/Users/Luna/Documents/GitHub/AC20",
+      "program": "c:/Users/Luna/Documents/GitHub/AC20/build/Debug/outDebug",
       "MIMode": "gdb",
-      "miDebuggerPath": "C:\\MinGW\\bin\\gdb.exe",
+      "miDebuggerPath": "gdb",
       "setupCommands": [
         {
           "description": "Enable pretty-printing for gdb",

@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include "utils.h"
+#include "string.h"
 #include "parse_controle_structures.h"
 
-ASTNode *parse_if(TokenList *tokens, int *index, Analyse_Table *table, int *current_block_index)
+ASTNode *parse_if(TokenList *tokens, int *index, int *current_block_index)
 {
     int start = *index;
     // 1) Vérification syntaxique (avance index) via is_if
@@ -49,7 +50,7 @@ ASTNode *parse_if(TokenList *tokens, int *index, Analyse_Table *table, int *curr
     pos++;
 
     // 4) then-block
-    ASTNode *thenBlock = parse_block(tokens, &pos, table, current_block_index);
+    ASTNode *thenBlock = parse_block(tokens, &pos, current_block_index);
     if (!thenBlock)
     {
         *index = start;
@@ -65,11 +66,11 @@ ASTNode *parse_if(TokenList *tokens, int *index, Analyse_Table *table, int *curr
         ASTNode *elseNode;
         if (pos < tokens->count && tokens->tokens[pos].type == TOKEN_KEYWORD && strcmp(tokens->tokens[pos].valeur, "if") == 0)
         {
-            elseNode = parse_if(tokens, &pos, table, current_block_index);
+            elseNode = parse_if(tokens, &pos, current_block_index);
         }
         else
         {
-            elseNode = parse_block(tokens, &pos, table, current_block_index);
+            elseNode = parse_block(tokens, &pos, current_block_index);
         }
         if (!elseNode)
         {
@@ -85,7 +86,7 @@ ASTNode *parse_if(TokenList *tokens, int *index, Analyse_Table *table, int *curr
     return ifNode;
 }
 
-ASTNode *parse_while(TokenList *tokens, int *index, Analyse_Table *table, int *current_block_index)
+ASTNode *parse_while(TokenList *tokens, int *index, int *current_block_index)
 {
     int start = *index;
 
@@ -117,7 +118,7 @@ ASTNode *parse_while(TokenList *tokens, int *index, Analyse_Table *table, int *c
     pos++;
 
     //    b) then-block
-    ASTNode *thenBlock = parse_block(tokens, &pos, table, current_block_index);
+    ASTNode *thenBlock = parse_block(tokens, &pos, current_block_index);
     add_child(whileNode, thenBlock);
 
     // 4) Synchroniser l’index et retourner
@@ -125,7 +126,7 @@ ASTNode *parse_while(TokenList *tokens, int *index, Analyse_Table *table, int *c
     return whileNode;
 }
 
-ASTNode *parse_for(TokenList *tokens, int *index, Analyse_Table *table, int *current_block_index)
+ASTNode *parse_for(TokenList *tokens, int *index, int *current_block_index)
 {
     int start = *index;
     if (!is_for(tokens, index))
@@ -151,7 +152,7 @@ ASTNode *parse_for(TokenList *tokens, int *index, Analyse_Table *table, int *cur
     // INIT
     ASTNode *init = NULL;
     int tmp = pos;
-    init = parse_declaration(tokens, &tmp, table, current_block_index);
+    init = parse_declaration(tokens, &tmp, current_block_index);
     if (!init)
     {
         tmp = pos;
@@ -227,7 +228,7 @@ ASTNode *parse_for(TokenList *tokens, int *index, Analyse_Table *table, int *cur
     pos++; // consomme ')'
 
     // Bloc
-    ASTNode *body = parse_block(tokens, &pos, table, current_block_index);
+    ASTNode *body = parse_block(tokens, &pos, current_block_index);
     if (!body)
     {
         *index = start;
